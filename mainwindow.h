@@ -17,6 +17,7 @@ namespace Ui {
 class MainWindow;
 }
 
+//На случай развития сервера возможно добавление нтерфейса администратора
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
