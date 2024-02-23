@@ -247,11 +247,11 @@ void MyDatabase::insertMessage(QString message, QString str)
     }
 }
 
-void MyDatabase::insertRoom(QString roomID)
+void MyDatabase::insertRoom(QString text)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO Rooms(text) VALUES ('"+roomID+"')";
+        QString insert ="INSERT INTO Rooms(text) VALUES ('"+text+"')";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
@@ -263,7 +263,7 @@ void MyDatabase::insertClientRoom(QString User, QString Room, QString access_tok
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO RoomsUsers(User, Room, Access_token) VALUES ('"+User+"','"+Room+"','"+access_token+"')";
+        QString insert ="INSERT INTO RoomsUsers([User], Room, Access_token) VALUES ('"+User+"','"+Room+"','"+access_token+"')";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
@@ -289,3 +289,24 @@ QList<QString> MyDatabase::selectRooms(QString user)
 }
 
 
+bool MyDatabase:: findClient(QString clientLogin)
+{
+    QSqlQuery query(myDB);
+    QString selectExists="SELECT COUNT(1) FROM Clients WHERE login='"+clientLogin+"'";
+    query.prepare(selectExists);
+    query.exec();
+    query.next();
+    bool res=query.value(0).toBool();
+    return res;
+}
+
+int MyDatabase::selectRoom()
+{
+    QSqlQuery query(myDB);
+    QString selectTop="SELECT TOP (1) Id FROM Rooms ORDER BY Id DESC";
+    query.prepare(selectTop);
+    query.exec();
+    query.next();
+    int res=query.value(0).toInt();
+    return res;
+}

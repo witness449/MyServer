@@ -33,6 +33,9 @@ void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
     else if(path=="/stop"){
 
     }
+    else if (path=="/create_room"){
+        createRoomController.service(request, response, pMdb, pM);
+    }
     else {
         response.setStatus(404, "Not found");
     }

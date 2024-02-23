@@ -1,10 +1,25 @@
 #ifndef CREATEROOMCONTROLLER_H
 #define CREATEROOMCONTROLLER_H
 
-class CreateRoomController
+#include <QObject>
+#include "httprequesthandler.h"
+#include "mydatabase.h"
+#include <QMutex>
+
+using namespace stefanfrings;
+
+class CreateRoomController :  public HttpRequestHandler
 {
+    Q_OBJECT
 public:
-    CreateRoomController();
+    CreateRoomController(QObject *parent = 0);
+    void service(HttpRequest& request, HttpResponse& response, MyDatabase * pMdb, QMutex* pm);
+
+
+signals:
+
+public slots:
+
 };
 
 #endif // CREATEROOMCONTROLLER_H

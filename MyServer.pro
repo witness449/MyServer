@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     regcontroller.cpp \
     authcontroller.cpp \
     synccontroller.cpp \
-    sendcontroller.cpp
+    sendcontroller.cpp \
+    createroomcontroller.cpp
+
 
 HEADERS  += mainwindow.h \
     mycontroller.h \
@@ -31,7 +33,10 @@ HEADERS  += mainwindow.h \
     regcontroller.h \
     authcontroller.h \
     synccontroller.h \
-    sendcontroller.h
+    sendcontroller.h \
+    createroomcontroller.h
+
+
 
 FORMS    += mainwindow.ui
 
