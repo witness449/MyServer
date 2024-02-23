@@ -310,3 +310,10 @@ int MyDatabase::selectRoom()
     int res=query.value(0).toInt();
     return res;
 }
+
+void MyDatabase::createMessageTable(QString roomID)
+{
+    QSqlQuery query(myDB);
+    QString create ="CREATE TABLE TestMessagess"+roomID+" (id INTEGER  PRIMARY KEY IDENTITY (1,1), text  VARCHAR (255))";
+    query.exec(create);
+}
