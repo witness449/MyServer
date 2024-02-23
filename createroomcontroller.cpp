@@ -25,6 +25,9 @@ void CreateRoomController::service(HttpRequest &request, HttpResponse &response,
         char const *roomID = tmp.c_str();
         pMdb->insertClientRoom(clientLogin, roomID);
         pMdb->insertClientRoom(creatorLogin, roomID);
+
+        pMdb->createMessageTable(roomID);
+
         response.setStatus(200, "OK");
         pM->unlock();
     }

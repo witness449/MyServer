@@ -35,6 +35,7 @@ public:
     QList<QString> selectRooms(QString client); //Получение писка чата по пользователю
     bool findClient(QString clientLogin);
     int selectRoom();
+    void createMessageTable(QString roomID);
 
 };
 
