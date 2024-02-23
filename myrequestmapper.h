@@ -8,6 +8,7 @@
 #include "authcontroller.h"
 #include "synccontroller.h"
 #include "sendcontroller.h"
+#include "createroomcontroller.h"
 #include "mydatabase.h"
 #include <QMutex>
 #include <QTcpSocket>
@@ -24,6 +25,7 @@ private:
     AuthController authController; //Контроллер по конечной точке /auth
     SyncController syncController; //Контроллер по конечной точке /sync
     SendController sendController; //Контроллер по конечной точке /send
+    CreateRoomController createRoomController; //Контроллер по конечной точке /create_room
     MyController myController;
 
     MyDatabase* pMdb;

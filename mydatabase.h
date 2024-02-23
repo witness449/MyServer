@@ -33,6 +33,8 @@ public:
     void insertRoom(QString roomID); //Внесение чата
     void insertClientRoom(QString client, QString room, QString access_token=""); //Соотнесение пользователя и чата
     QList<QString> selectRooms(QString client); //Получение писка чата по пользователю
+    bool findClient(QString clientLogin);
+    int selectRoom();
 
 };
 
