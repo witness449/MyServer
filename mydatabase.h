@@ -25,15 +25,15 @@ public:
     void printTable();
 
     //Работа с данными
-    bool clientInsert(QString, QString); //Внесение пользователя
-    QString selectClient (QString);
+    bool userInsert(QString, QString); //Внесение пользователя
+    QString selectUser (QString);
     bool selectMessage(int, QString, QString&);//Выбор сообщения
     void insertTestMessages(QString);
     void insertMessage(QString, QString);//Внесение сообщения
     void insertRoom(QString roomID); //Внесение чата
-    void insertClientRoom(QString client, QString room, QString access_token=""); //Соотнесение пользователя и чата
-    QList<QString> selectRooms(QString client); //Получение писка чата по пользователю
-    bool findClient(QString clientLogin);
+    void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
+    QList<QString> selectRooms(QString user); //Получение писка чата по пользователю
+    bool findUser(QString userLogin);
     int selectRoom();
     void createMessageTable(QString roomID);
 

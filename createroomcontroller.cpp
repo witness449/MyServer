@@ -12,21 +12,23 @@ void CreateRoomController::service(HttpRequest &request, HttpResponse &response,
     QJsonObject object=doc.object();
 
     QString creatorLogin=object["creatorLogin"].toString();
-    QString clientLogin=object["clientLogin"].toString();
+    QString userLogin=object["clientLogin"].toString();
 
     pM->lock();
-    bool res=pMdb->findClient(clientLogin);
+    bool res=pMdb->findUser(userLogin);
     pM->unlock();
 
     if (res){
         pMdb->insertRoom("t");
         pM->lock();
-        std::string tmp = std::to_string(pMdb->selectRoom());
-        char const *roomID = tmp.c_str();
-        pMdb->insertClientRoom(clientLogin, roomID);
-        pMdb->insertClientRoom(creatorLogin, roomID);
+        //std::string tmp = std::to_string(pMdb->selectRoom());
+        //char const *roomID = tmp.c_str();
+        int roomID=pMdb->selectRoom();
+        pMdb->insertUserRoom(userLogin, roomID, "1234");
+        pMdb->insertUserRoom(creatorLogin, roomID, "1234");
 
-        pMdb->createMessageTable(roomID);
+        QString str_roomID=QString::number(roomID);
+        pMdb->createMessageTable(str_roomID);
 
         response.setStatus(200, "OK");
         pM->unlock();

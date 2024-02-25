@@ -15,7 +15,7 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
     QString login=object["Login"].toString();
     QString password=object["Password"].toString();
     pM->lock();
-    QString passwordFromDb=pMdb->selectClient(login);
+    QString passwordFromDb=pMdb->selectUser(login);
     pM->unlock();
 
     if (password==passwordFromDb)
