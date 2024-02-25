@@ -1,6 +1,7 @@
 #include "authcontroller.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMultiMap>
 
 AuthController::AuthController(QObject *parent) :
     HttpRequestHandler(parent)
@@ -23,19 +24,29 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
         qDebug()<<"authorized";
 
         pM->lock();
-        QList<QString> roomsList= pMdb->selectRooms(login);
+        QMultiMap<QString, QString> roomsList= pMdb->selectRooms(login);
         pM->unlock();
         QJsonObject jsonObject;
         jsonObject["Authorization_token"]="pass_from_server";
         QString authToken=jsonObject["Authorization_token"].toString();
         int count=1;
-        for(auto& el:roomsList)
+
+        for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i)
+        {
+            QString str_count=QString::number(count);
+            jsonObject[str_count+"Room"]=i.value();
+            authToken+="_"+i.key();
+            count++;
+        }
+
+        /*for(auto& el:roomsList)
         {
            QString str_count=QString::number(count);
            jsonObject[str_count+"Room"]=el;
            authToken+="_"+el;
            count++;
-        }
+        }*/
+
         jsonObject["Authorization_token"]=authToken;
         response.setStatus(200, "OK");
         QJsonDocument document=QJsonDocument(jsonObject);

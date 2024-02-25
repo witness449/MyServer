@@ -1,6 +1,23 @@
 #include "createroomcontroller.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTime>
+
+
+QString RandomGenerator()
+{
+    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+
+    int randInt;
+    QString myString;
+    for(int i=0; i<5; i++)
+    {
+    randInt = qrand()%('Z'-'A'+1)+'A';
+    myString.append(randInt);
+    }
+    return myString;
+}
+
 
 CreateRoomController::CreateRoomController(QObject *parent) :
     HttpRequestHandler(parent)
@@ -19,13 +36,13 @@ void CreateRoomController::service(HttpRequest &request, HttpResponse &response,
     pM->unlock();
 
     if (res){
-        pMdb->insertRoom("t");
+        pMdb->insertRoom(creatorLogin+"AND"+userLogin);
         pM->lock();
         //std::string tmp = std::to_string(pMdb->selectRoom());
         //char const *roomID = tmp.c_str();
         int roomID=pMdb->selectRoom();
-        pMdb->insertUserRoom(userLogin, roomID, "1234");
-        pMdb->insertUserRoom(creatorLogin, roomID, "1234");
+        pMdb->insertUserRoom(userLogin, roomID, RandomGenerator());
+        pMdb->insertUserRoom(creatorLogin, roomID, RandomGenerator());
 
         QString str_roomID=QString::number(roomID);
         pMdb->createMessageTable(str_roomID);

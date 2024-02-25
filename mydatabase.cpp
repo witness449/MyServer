@@ -1,6 +1,7 @@
 #include "mydatabase.h"
 #include <QFile>
 
+
 int MyDatabase::count=0;
 
 MyDatabase::MyDatabase(){}
@@ -280,18 +281,22 @@ void MyDatabase::insertUserRoom(QString User, int Room, QString access_token)
      }
 }
 
-QList<QString> MyDatabase::selectRooms(QString user)
+QMultiMap<QString, QString> MyDatabase::selectRooms(QString user)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString selectRooms="SELECT * FROM RoomssUsers WHERE IdUser =(SELECT Id FROM Users WHERE Login='"+user+"')";
+        QString selectRooms="SELECT ru1.AccessToken, r.Id, u.Login FROM RoomssUsers ru1 "
+                "INNER JOIN RoomssUsers ru2 ON ru1.IdRoom=ru2.IdRoom "
+                "INNER JOIN Rooms r ON ru1.IdRoom=r.Id "
+                "INNER JOIN Users u ON ru2.IdUser=u.Id "
+                "WHERE ru1.IdUser =(SELECT Id FROM Users WHERE Login='Alice')AND u.ID!=(SELECT Id FROM Users WHERE Login='Alice')";
         bool res=query.exec(selectRooms);
         QSqlRecord rec =query.record();
 
-        QList<QString> RoomsList;
+        QMultiMap<QString, QString> RoomsList;
 
         while (query.next()){
-            RoomsList.append(QString::number(query.value(rec.indexOf("IdRoom")).toInt()));
+            RoomsList.insert(query.value(rec.indexOf("AccessToken")).toString()+query.value(rec.indexOf("Id")).toString(), query.value(rec.indexOf("Login")).toString());
             }
 
         return RoomsList;

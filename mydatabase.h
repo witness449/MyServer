@@ -7,6 +7,7 @@
 #include <QSqlQuery>
 #include <QSQLError>
 #include <QSqlRecord>
+#include <QMultiMap>
 
 class MyDatabase
 {
@@ -32,7 +33,7 @@ public:
     void insertMessage(QString, QString);//Внесение сообщения
     void insertRoom(QString roomID); //Внесение чата
     void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
-    QList<QString> selectRooms(QString user); //Получение писка чата по пользователю
+    QMultiMap<QString, QString> selectRooms(QString user); //Получение писка чата по пользователю
     bool findUser(QString userLogin);
     int selectRoom();
     void createMessageTable(QString roomID);
