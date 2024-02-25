@@ -9,6 +9,7 @@ MyRequestMapper::MyRequestMapper(QObject *parent, MyDatabase* pMDB, QMutex* pm) 
     //pMdb=pMDB;
     pMdb=new MyDatabase();
     pMdb->createConnection();
+    pMdb->createTable();
     pM=new QMutex;
 
 }

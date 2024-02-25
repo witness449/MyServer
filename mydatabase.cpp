@@ -41,27 +41,37 @@ void MyDatabase::closeConnection(){
 
 void MyDatabase::createTable(){
     if(myDB.isValid()){
-    /*QSqlQuery query(myDB);
-    QString create ="CREATE TABLE Users (Id INTEGER  PRIMARY KEY IDENTITY (1,1), Login  VARCHAR(50) NOT NULL, Password VARCHAR(50) NOT NULL, DisplayName VARCHAR (50))
-";
+    QSqlQuery query(myDB);
+    QString create ="CREATE TABLE Rooms (Id INTEGER  PRIMARY KEY IDENTITY (1,1), Name  VARCHAR(50) NOT NULL, Alias VARCHAR(50), IsActive BIT NOT NULL)";
     qDebug()<<"Create table status: "<<query.exec(create);
-    qDebug()<<myDB.tables();*/
+    qDebug()<<myDB.tables();
 
     QSqlQuery query5(myDB);
-    QString create5 ="CREATE TABLE TestMessagess1 (id INTEGER  PRIMARY KEY IDENTITY (1,1), text  VARCHAR (255))";
+    QString create5 ="CREATE TABLE RoomssUsers (Id INTEGER  PRIMARY KEY IDENTITY (1,1), IdUser INTEGER NOT NULL, IdRoom INTEGER NOT NULL, AccessToken VARCHAR(50) NOT NULL)";
     qDebug()<<"Create table status: "<<query5.exec(create5);
     qDebug()<<myDB.tables();
 
 
-    /*QSqlQuery query3(myDB);
-    QString create3 ="CREATE TABLE Roomss (id INTEGER  PRIMARY KEY IDENTITY(1,1), text  VARCHAR(20))";
+    QSqlQuery query3(myDB);
+    QString create3 ="CREATE TABLE BlackLIst (Id INTEGER  PRIMARY KEY IDENTITY (1,1), IdWhoBan INTEGER NOT NULL, IdWhoBanned INTEGER NOT NULL)";
     qDebug()<<"Create table status: "<<query3.exec(create3);
     qDebug()<<myDB.tables();
 
     QSqlQuery query4(myDB);
-    QString create4 ="CREATE TABLE RoomssClientss (id INTEGER  PRIMARY KEY IDENTITY (1,1), Client  VARCHAR(20), Room VARCHAR(20), Access_token VARCHAR(50))";
+    QString create4 ="CREATE TABLE Users (Id INTEGER  PRIMARY KEY IDENTITY (1,1), Login  VARCHAR(50) NOT NULL, Password VARCHAR(50) NOT NULL, DisplayName VARCHAR (50))";
     qDebug()<<"Create table status: "<<query4.exec(create4);
-    qDebug()<<myDB.tables();*/
+    qDebug()<<myDB.tables();
+
+    QSqlQuery query6(myDB);
+    QString createForeignKeys ="ALTER TABLE RoomssUsers  WITH CHECK ADD  CONSTRAINT FK_RoomsUsers_Users FOREIGN KEY(IdUser)REFERENCES Users (Id) "
+            "ALTER TABLE RoomssUsers CHECK CONSTRAINT FK_RoomsUsers_Users "
+            "ALTER TABLE RoomssUsers  WITH CHECK ADD  CONSTRAINT FK_RoomsUsers_Rooms FOREIGN KEY(IdRoom)REFERENCES Rooms (Id) "
+            "ALTER TABLE RoomssUsers CHECK CONSTRAINT FK_RoomsUsers_Rooms "
+            "ALTER TABLE BlackList  WITH CHECK ADD  CONSTRAINT FK_BlackList_UserBan FOREIGN KEY(IdWhoBan)REFERENCES Users (Id) "
+            "ALTER TABLE BlackList CHECK CONSTRAINT FK_BlackList_UserBan "
+            "ALTER TABLE BlackList  WITH CHECK ADD  CONSTRAINT FK_BlackList_UserBanned FOREIGN KEY(IdWhoBanned) REFERENCES Users (Id) "
+            "ALTER TABLE BlackList CHECK CONSTRAINT FK_BlackList_UserBanned";
+    query6.exec(createForeignKeys);
     }
     else{
         qDebug()<<"db is not valid";
@@ -70,35 +80,33 @@ void MyDatabase::createTable(){
 
 void MyDatabase:: dropTable(){
     if(myDB.isValid()){
-    /*QSqlQuery query(myDB);
-    QString drop="DROP TABLE Clients";
-    query.exec(drop);
-    qDebug()<<myDB.tables()<<"Should be only TestMessagess table";*/
+        for (int i=1; i<=this->selectRoom(); i++)
+        {
+            QSqlQuery query(myDB);
+            QString drop="DROP TABLE Events"+QString::number(i);
+            query.exec(drop);
+        }
 
-    QSqlQuery query2(myDB);
-    QString drop2="DROP TABLE TestMessagess1";
-    query2.exec(drop2);
-    qDebug()<<myDB.tables()<<"Should be no tables";
+        QSqlQuery query(myDB);
+        QString drop="DROP TABLE BlackList";
+        query.exec(drop);
+        qDebug()<<myDB.tables()<<"Should be no tables";
 
-    /*QSqlQuery query3(myDB);
-    QString drop3="DROP TABLE TestMessagess2";
-    query3.exec(drop3);
-    qDebug()<<myDB.tables()<<"Should be no tables";
+        QSqlQuery query2(myDB);
+        QString drop2="DROP TABLE RoomssUsers";
+        query2.exec(drop2);
+        qDebug()<<myDB.tables()<<"Should be no tables";
 
-    QSqlQuery query4(myDB);
-    QString drop4="DROP TABLE TestMessagess3";
-    query4.exec(drop4);
-    qDebug()<<myDB.tables()<<"Should be no tables";
+        QSqlQuery query3(myDB);
+        QString drop3="DROP TABLE Users";
+        query3.exec(drop3);
+        qDebug()<<myDB.tables()<<"Should be only TestMessagess table";
 
-    QSqlQuery query5(myDB);
-    QString drop5="DROP TABLE Roomss";
-    query5.exec(drop5);
-    qDebug()<<myDB.tables()<<"Should be no tables";
+        QSqlQuery query4(myDB);
+        QString drop4="DROP TABLE Rooms";
+        query4.exec(drop4);
+        qDebug()<<myDB.tables()<<"Should be no tables";
 
-    QSqlQuery query6(myDB);
-    QString drop6="DROP TABLE RoomssClientss";
-    query6.exec(drop6);
-    qDebug()<<myDB.tables()<<"Should be no tables";*/
     }
     else{
         qDebug()<<"db is not valid";
@@ -253,7 +261,7 @@ void MyDatabase::insertRoom(QString text)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO Rooms(Name) VALUES ('"+text+"')";
+        QString insert ="INSERT INTO Rooms(Name, IsActive) VALUES ('"+text+"', 1)";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
@@ -265,7 +273,7 @@ void MyDatabase::insertUserRoom(QString User, int Room, QString access_token)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO RoomssUsers (IdUser, IdRoom, AccessToken) VALUES ((SELECT Id FROM Users WHERE Login='"+User+"'), "+Room+",'"+access_token+"')";
+        QString insert ="INSERT INTO RoomssUsers (IdUser, IdRoom, AccessToken) VALUES ((SELECT Id FROM Users WHERE Login='"+User+"'), "+QString::number(Room)+",'"+access_token+"')";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
