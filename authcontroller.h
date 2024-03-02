@@ -3,8 +3,11 @@
 
 #include <QObject>
 #include "httprequesthandler.h"
+#include "httpsession.h"
+#include "httpsessionstore.h"
 #include "mydatabase.h"
 #include <QMutex>
+#include "global.h"
 
 using namespace stefanfrings;
 

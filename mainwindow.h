@@ -8,6 +8,7 @@
 #include "httpsessionstore.h"
 #include "myrequestmapper.h"
 #include "mydatabase.h"
+#include "global.h"
 #include <QTimer>
 #include <QMutex>
 
@@ -35,6 +36,7 @@ private:
     QMutex m;
     //Отладночный таймер
     QTimer* testMessageInsertTimer;
+
 
 private slots:
 

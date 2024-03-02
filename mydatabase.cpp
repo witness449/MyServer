@@ -2,6 +2,7 @@
 #include <QFile>
 
 
+
 int MyDatabase::count=0;
 
 MyDatabase::MyDatabase(){}
@@ -281,7 +282,7 @@ void MyDatabase::insertUserRoom(QString User, int Room, QString access_token)
      }
 }
 
-QMultiMap<QString, QString> MyDatabase::selectRooms(QString user)
+QList<QJsonObject> MyDatabase::selectRooms(QString user)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
@@ -293,10 +294,14 @@ QMultiMap<QString, QString> MyDatabase::selectRooms(QString user)
         bool res=query.exec(selectRooms);
         QSqlRecord rec =query.record();
 
-        QMultiMap<QString, QString> RoomsList;
+        QList<QJsonObject> RoomsList;
 
         while (query.next()){
-            RoomsList.insert(query.value(rec.indexOf("AccessToken")).toString()+query.value(rec.indexOf("Id")).toString(), query.value(rec.indexOf("Login")).toString());
+            QJsonObject object;
+            object["Id"]=query.value(rec.indexOf("Id")).toString();
+            object["AccessToken"]=query.value(rec.indexOf("AccessToken")).toString();
+            object["Login"]=query.value(rec.indexOf("Login")).toString();
+            RoomsList.append(object);
             }
 
         return RoomsList;

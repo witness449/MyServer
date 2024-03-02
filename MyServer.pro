@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     authcontroller.cpp \
     synccontroller.cpp \
     sendcontroller.cpp \
-    createroomcontroller.cpp
+    createroomcontroller.cpp \
+    global.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -34,7 +35,8 @@ HEADERS  += mainwindow.h \
     authcontroller.h \
     synccontroller.h \
     sendcontroller.h \
-    createroomcontroller.h
+    createroomcontroller.h \
+    global.h
 
 
 
@@ -43,3 +45,13 @@ FORMS    += mainwindow.ui
 include(../MyServer/QtWebApp/httpserver/httpserver.pri)
 
 CONFIG +=C++11
+
+win32:CONFIG(release, debug|release): LIBS +=-LD:/tools/OpenSSL/vc-win32/lib/ -llibcrypto
+
+INCLUDEPATH += D:/tools/OpenSSL/vc-win32/include
+DEPENDPATH += D:/tools/OpenSSL/vc-win32/include
+
+win32:CONFIG(release, debug|release): LIBS +=-LD:/tools/OpenSSL/vc-win32/lib/ -llibssl
+
+INCLUDEPATH += D:/tools/OpenSSL/vc-win32/include
+DEPENDPATH += D:/tools/OpenSSL/vc-win32/include

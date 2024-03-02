@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //Запуск библиотечных функций для работы веб сервера (запуск сервера)
     QSettings* sessionSettings=new QSettings("D:/HttpQt/MyServer/MyServer/MyServer/etc/webapp1.ini", QSettings::IniFormat,this);
     sessionSettings->beginGroup("sessions");
-    HttpSessionStore* sessionStore=new stefanfrings::HttpSessionStore(sessionSettings,this);
+    sessionStore=new stefanfrings::HttpSessionStore(sessionSettings,this);
     QSettings* listenerSettings=new QSettings("D:/HttpQt/MyServer/MyServer/MyServer/etc/webapp1.ini",QSettings::IniFormat,this);
     listenerSettings->beginGroup("listener");
     new HttpListener(listenerSettings,new MyRequestMapper(this, pMyDB, &m),this);
