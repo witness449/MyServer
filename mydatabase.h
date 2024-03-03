@@ -31,7 +31,7 @@ public:
     QString selectUser (QString);
     bool selectMessage(int, QString, QString&);//Выбор сообщения
     void insertTestMessages(QString);
-    void insertMessage(QString, QString);//Внесение сообщения
+    void insertMessage(QString, QString, QString);//Внесение сообщения
     void insertRoom(QString roomID); //Внесение чата
     void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
     QList<QJsonObject> selectRooms(QString user); //Получение писка чата по пользователю

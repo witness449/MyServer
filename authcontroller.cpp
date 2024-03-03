@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QMultiMap>
 #include <QDebug>
+#include <QJsonArray>
 
 AuthController::AuthController(QObject *parent) :
     HttpRequestHandler(parent)
@@ -10,21 +11,43 @@ AuthController::AuthController(QObject *parent) :
 }
 
 void AuthController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
-    HttpSession session=sessionStore->getSession(request,response,true);
+    sessionStore->getSession(request,response,true);
+    QString sessionIdTmp=QString(sessionStore->getSession(request,response,true).getId());
 
-    QMap<QByteArray,QVariant> sessDetails=session.getAll();
-    for (auto el:sessDetails)
+    if (request.getMethod()=="GET")
     {
-        qDebug()<<el;
+        response.setHeader("Request-type", "AuthentificationStage1");
+
+        response.setStatus(401, "Unauthorized");
+        QJsonObject jsonObject;
+        jsonObject["type"]="m.login.password";
+        jsonObject["identifier"]="<login>";
+        jsonObject["password"]="<password>";
+
+        sessionId=sessionIdTmp;
+
+        jsonObject["session"]=sessionId;
+
+        QJsonDocument document=QJsonDocument(jsonObject);
+        QByteArray byte_array = document.toJson();
+        response.setHeader("Content-Type", "application/json");
+        response.write(byte_array, true);
+
     }
 
 
-    response.setHeader("Request-type", "Authorization");
+    else if (request.getMethod()=="POST")
+    {
+    response.setHeader("Request-type", "AuthentificationStage2");
     QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
     QJsonObject object=doc.object();
 
-    QString login=object["Login"].toString();
-    QString password=object["Password"].toString();
+    QString login=object["identifier"].toString();
+    QString password=object["password"].toString();
+    QString sessId=object["session"].toString();
+
+    if (object["session"].toString()==sessionId)
+    {
     pM->lock();
     QString passwordFromDb=pMdb->selectUser(login);
     pM->unlock();
@@ -40,12 +63,17 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
         jsonObject["Authorization_token"]="pass_from_server";
         QString authToken=jsonObject["Authorization_token"].toString();
         int count=1;
+        QJsonArray RoomsArray;
 
         for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i)
         {
             QString str_count=QString::number(count);
-            jsonObject[str_count+"Room"]=(*i)["Id"].toString()+(*i)["Login"].toString();
-            authToken+="_"+(*i)["Id"].toString()+(*i)["AccessToken"].toString();
+            jsonObject[str_count+"Room"]=(*i)["Id"].toString()+" "+(*i)["Login"].toString();
+            authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
+            QJsonObject roomObject;
+            roomObject["id"]=(*i)["Id"];
+            roomObject["login"]=(*i)["Login"].toString();
+            RoomsArray.append(roomObject);
             count++;
         }
 
@@ -57,12 +85,19 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
            count++;
         }*/
 
+        jsonObject["Rooms"]=RoomsArray;
         jsonObject["Authorization_token"]=authToken;
         response.setStatus(200, "OK");
         QJsonDocument document=QJsonDocument(jsonObject);
         QByteArray byte_array = document.toJson();
         response.setHeader("Content-Type", "application/json");
         response.write(byte_array, true);
+    }
+    }
+    else
+    {
+        response.setStatus(401, "Unauthorized");
+    }
     }
     else
     {

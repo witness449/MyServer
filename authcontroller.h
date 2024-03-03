@@ -18,6 +18,8 @@ class AuthController: public HttpRequestHandler
 public:
     AuthController(QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response, MyDatabase * pMdb, QMutex* pm);
+private:
+    QString sessionId;
 
 signals:
 

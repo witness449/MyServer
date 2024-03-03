@@ -229,14 +229,15 @@ bool MyDatabase::selectMessage(int messageId, QString roomId, QString& text)
 {
     QSqlQuery query(myDB);
     QString message_id=QString::number(messageId);
-    QString selectMessage="SELECT * FROM Events"+roomId+" WHERE Id="+message_id;
+    QString selectMessage="SELECT e.id, Content, Login FROM Events"+roomId+" e INNER JOIN Users u ON e.IdSender=u.Id WHERE e.Id="+message_id;
     query.exec(selectMessage);
     QSqlRecord rec =query.record();
     bool res;
     while (query.next()){
-        qDebug()<<"Id: "<<query.value(rec.indexOf("Id")).toInt()
-        <<"Content: "<<query.value(rec.indexOf("Content")).toString();
-        text=query.value(rec.indexOf("Content")).toString();
+        qDebug()<<"Id: "<<query.value(rec.indexOf("e.Id")).toInt()
+        <<"Content: "<<query.value(rec.indexOf("Content")).toString()
+        <<"Sender: "<<query.value(rec.indexOf("Login")).toString();
+        text=query.value(rec.indexOf("Login")).toString()+": "+query.value(rec.indexOf("Content")).toString();
         }
     QString selectExists="SELECT COUNT(1) FROM Events"+roomId+" WHERE Id='"+message_id+"'";
     query.prepare(selectExists);
@@ -247,11 +248,11 @@ bool MyDatabase::selectMessage(int messageId, QString roomId, QString& text)
     return res;
 }
 
-void MyDatabase::insertMessage(QString message, QString str)
+void MyDatabase::insertMessage(QString message, QString str, QString login)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO Events"+str+" (Content, IdRoom) VALUES ('"+message+"', "+str+")";
+        QString insert ="INSERT INTO Events"+str+" (Content, IdRoom, idSender) VALUES ('"+message+"', "+str+", (SELECT Id FROM Users WHERE Login='"+login+"'))";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
@@ -290,7 +291,7 @@ QList<QJsonObject> MyDatabase::selectRooms(QString user)
                 "INNER JOIN RoomssUsers ru2 ON ru1.IdRoom=ru2.IdRoom "
                 "INNER JOIN Rooms r ON ru1.IdRoom=r.Id "
                 "INNER JOIN Users u ON ru2.IdUser=u.Id "
-                "WHERE ru1.IdUser =(SELECT Id FROM Users WHERE Login='Alice')AND u.ID!=(SELECT Id FROM Users WHERE Login='Alice')";
+                "WHERE ru1.IdUser =(SELECT Id FROM Users WHERE Login='"+user+"')AND u.ID!=(SELECT Id FROM Users WHERE Login='"+user+"') AND r.IsActive=1";
         bool res=query.exec(selectRooms);
         QSqlRecord rec =query.record();
 

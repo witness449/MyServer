@@ -12,7 +12,8 @@ void SendController::service(HttpRequest &request, HttpResponse &response, MyDat
     QJsonObject object=doc.object();
     QString message=object["message"].toString();
     QString roomId=object["room_id"].toString();
+    QString login=object["login"].toString();
     pM->lock();
-    pMdb->insertMessage(message, roomId);
+    pMdb->insertMessage(message, roomId, login);
     pM->unlock();
 }
