@@ -28,7 +28,7 @@ public:
 
     //Работа с данными
     bool userInsert(QString, QString); //Внесение пользователя
-    QString selectUser (QString);
+    QString selectUser (QString); //GetPassword
     bool selectMessage(int, QString, QString&);//Выбор сообщения
     void insertTestMessages(QString);
     void insertMessage(QString, QString, QString);//Внесение сообщения
@@ -36,7 +36,7 @@ public:
     void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
     QList<QJsonObject> selectRooms(QString user); //Получение писка чата по пользователю
     bool findUser(QString userLogin);
-    int selectRoom();
+    int selectRoom(); //Возвращает ID последней созданной комнаиты
     void createMessageTable(QString roomID);
 
 };
