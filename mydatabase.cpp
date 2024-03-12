@@ -60,7 +60,7 @@ void MyDatabase::createTable(){
     qDebug()<<myDB.tables();
 
     QSqlQuery query4(myDB);
-    QString create4 ="CREATE TABLE Users (Id INTEGER  PRIMARY KEY IDENTITY (1,1), Login  VARCHAR(50) NOT NULL, Password VARCHAR(50) NOT NULL, DisplayName VARCHAR (50))";
+    QString create4 ="CREATE TABLE Users (Id INTEGER  PRIMARY KEY IDENTITY (1,1), Login  VARCHAR(50) NOT NULL, Password VARCHAR(50) NOT NULL, DisplayName VARCHAR (50), AccessToken VARCHAR (255))";
     qDebug()<<"Create table status: "<<query4.exec(create4);
     qDebug()<<myDB.tables();
 
