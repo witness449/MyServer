@@ -39,6 +39,7 @@ public:
     int selectRoom(); //Возвращает ID последней созданной комнаиты
     void createMessageTable(QString roomID);
 
+
 };
 
 #endif // MYDATABASE_H

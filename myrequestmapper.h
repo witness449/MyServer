@@ -12,6 +12,8 @@
 #include "mydatabase.h"
 #include <QMutex>
 #include <QTcpSocket>
+#include <QList>
+#include <QJsonObject>
 
 
 using namespace stefanfrings;
@@ -35,6 +37,7 @@ private:
 public:
     explicit MyRequestMapper(QObject *parent = 0, MyDatabase* pMDB=NULL, QMutex* pm=NULL);
     void service(HttpRequest& request, HttpResponse& response);
+    static QString makeAccessToken(QString login, QList<QJsonObject> roomsList);
     ~MyRequestMapper();
 
 signals:

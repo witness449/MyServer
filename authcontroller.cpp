@@ -4,6 +4,7 @@
 #include <QMultiMap>
 #include <QDebug>
 #include <QJsonArray>
+#include "myrequestmapper.h"
 
 AuthController::AuthController(QObject *parent) :
     HttpRequestHandler(parent)
@@ -60,8 +61,8 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
         QList<QJsonObject> roomsList= pMdb->selectRooms(login);
         pM->unlock();
         QJsonObject jsonObject;
-        jsonObject["Authorization_token"]="pass_from_server";
-        QString authToken=jsonObject["Authorization_token"].toString();
+        //jsonObject["Authorization_token"]="pass_from_server";
+        //QString authToken=jsonObject["Authorization_token"].toString();
         int count=1;
         QJsonArray RoomsArray;
 
@@ -69,7 +70,7 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
         {
             QString str_count=QString::number(count);
             jsonObject[str_count+"Room"]=(*i)["Id"].toString()+" "+(*i)["Login"].toString();
-            authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
+            //authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
             QJsonObject roomObject;
             roomObject["id"]=(*i)["Id"];
             roomObject["login"]=(*i)["Login"].toString();
@@ -84,6 +85,8 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
            authToken+="_"+el;
            count++;
         }*/
+
+        QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
 
         jsonObject["Rooms"]=RoomsArray;
         jsonObject["Authorization_token"]=authToken;

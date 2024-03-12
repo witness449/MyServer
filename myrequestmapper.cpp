@@ -47,3 +47,13 @@ MyRequestMapper::~MyRequestMapper()
 {
     pMdb->closeConnection();
 }
+
+QString MyRequestMapper::makeAccessToken(QString login, QList<QJsonObject> roomsList)
+{
+    QString authToken=login;
+    for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i)
+    {
+        authToken+=" "+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
+    }
+    return authToken;
+}

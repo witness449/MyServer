@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <thread>
+#include "myrequestmapper.h"
 
 SyncController::SyncController(QObject *parent) :
     HttpRequestHandler(parent)
@@ -33,8 +34,8 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
         QList<QJsonObject> roomsList= pMdb->selectRooms(login);
         pM->unlock();
         QJsonObject jsonObject;
-        jsonObject["Authorization_token"]="pass_from_server";
-        QString authToken=jsonObject["Authorization_token"].toString();
+        //jsonObject["Authorization_token"]="pass_from_server";
+        //QString authToken=jsonObject["Authorization_token"].toString();
         int count=1;
         QJsonArray RoomsArray;
 
@@ -42,13 +43,14 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
         {
             QString str_count=QString::number(count);
             jsonObject[str_count+"Room"]=(*i)["Id"].toString()+" "+(*i)["Login"].toString();
-            authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
+            //authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
             QJsonObject roomObject;
             roomObject["id"]=(*i)["Id"];
             roomObject["login"]=(*i)["Login"].toString();
             RoomsArray.append(roomObject);
             count++;
         }
+        QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
 
         /*for(auto& el:roomsList)
         {
