@@ -252,7 +252,7 @@ void MyDatabase::insertMessage(QString message, QString str, QString login)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO Events"+str+" (Content, IdRoom, idSender) VALUES ('"+message+"', "+str+", (SELECT Id FROM Users WHERE Login='"+login+"'))";
+        QString insert ="INSERT INTO Events (Content, IdRoom, idSender) VALUES ('"+message+"', "+str+", (SELECT Id FROM Users WHERE Login='"+login+"'))";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
@@ -338,4 +338,86 @@ void MyDatabase::createMessageTable(QString roomID)
     QString create="CREATE TABLE Events"+roomID+" (Id INTEGER  PRIMARY KEY IDENTITY (1,1), IdRoom INTEGER NOT NULL, Content NVARCHAR(255) NOT NULL, IdSender INTEGER, TimeStamp DATETIME)";
     //QString create ="CREATE TABLE TestMessagess"+roomID+" (id INTEGER  PRIMARY KEY IDENTITY (1,1), text  VARCHAR (255))";
     query.exec(create);
+}
+
+
+QString MyDatabase::selectAccessToken(QString userLogin)
+{
+    QSqlQuery query(myDB);
+    QString selectTop="SELECT AccessToken FROM Users WHERE Login='"+userLogin+"'";
+    query.prepare(selectTop);
+    query.exec();
+    query.next();
+    QString res=query.value(0).toString();
+    return res;
+}
+
+
+QMap <int, bool> MyDatabase::selectRoomsForState(QString login)
+{
+    if (myDB.isValid()){
+        QSqlQuery query(myDB);
+        QString selectRooms="SELECT r.Id, r.IsActive FROM Rooms r "
+                            "INNER JOIN RoomssUsers ru ON r.Id=ru.IdRoom "
+                            "INNER JOIN Users u ON ru.IdUser=u.Id "
+                            "WHERE u.Login='"+login+"'";
+         bool res=query.exec(selectRooms);
+         QSqlRecord rec =query.record();
+
+         QMap<int, bool>result;
+
+         while (query.next()){
+             result.insert(query.value(rec.indexOf("Id")).toInt(), query.value(rec.indexOf("IsActive")).toBool() );
+             }
+
+         return result;
+
+    }
+}
+
+QMap<int, int> MyDatabase:: selectTopMessages(QString login)
+{
+    if (myDB.isValid()){
+        QSqlQuery query(myDB);
+        QString selectIds ="SELECT MAX(e.Id) As Id, e.IdRoom FROM Events e "
+                "INNER JOIN Rooms r ON e.IdRoom=r.Id "
+                "INNER JOIN RoomssUsers ur ON r.Id=ur.IdRoom "
+                "INNER JOIN Users u ON ur.IdUser=u.Id "
+                "WHERE u.Login='"+login+"' "
+                "GROUP BY e.IdRoom";
+        bool res=query.exec(selectIds);
+        qDebug()<<"Insert query status: "<<res;
+        if (!res) qDebug()<<query.lastError();
+
+        QSqlRecord rec =query.record();
+
+        QMap<int, int>result;
+
+        while (query.next()){
+            result.insert(query.value(rec.indexOf("IdRoom")).toInt(), query.value(rec.indexOf("Id")).toInt() );
+            }
+
+        return result;
+    }
+}
+
+void MyDatabase::selectSyncMessage(int idRoom, int lastId, int& thisId, QString& text)
+{
+    QSqlQuery query(myDB);
+    QString message_id=QString::number(lastId);
+    QString idRoomStr=QString::number(idRoom);
+    QString selectMessage="SELECT TOP (1) e.Id as Id, Content, Login FROM Events e INNER JOIN Users u ON e.IdSender=u.Id WHERE IdRoom="+idRoomStr+" AND e.Id>"+message_id+"  ORDER BY e.Id";
+
+    query.exec(selectMessage);
+    QSqlRecord rec =query.record();
+    bool res;
+    while (query.next()){
+        thisId=query.value(rec.indexOf("Id")).toInt();
+        qDebug()<<query.value(rec.indexOf("Id")).toInt();
+        qDebug()<<"Content: "<<query.value(rec.indexOf("Content")).toString()
+        <<"Sender: "<<query.value(rec.indexOf("Login")).toString();
+        text=query.value(rec.indexOf("Login")).toString()+": "+query.value(rec.indexOf("Content")).toString();
+        }
+    qDebug()<<message_id;
+
 }

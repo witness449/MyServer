@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <thread>
 #include "myrequestmapper.h"
+#include "clientstate.h"
 
 SyncController::SyncController(QObject *parent) :
     HttpRequestHandler(parent)
@@ -12,25 +13,75 @@ SyncController::SyncController(QObject *parent) :
 
 void SyncController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
     QString authToken=request.getHeader("Auth_token");
-    if (authToken.mid(0, 16)=="pass_from_server")
+    QString login;
+    QMap<int, QString> roomsTokens;
+
+    roomsTokens=MyRequestMapper::TokenParse(authToken, login);
+    QString tmpToken;
+
+    pM->lock();
+    tmpToken=pMdb->selectAccessToken(login);
+    pM->unlock();
+
+    if (tmpToken==authToken)
     {
         QString roomId=authToken.mid(17, 1);
         QString str_id=request.getHeader("Id");
-        QString login=request.getHeader("Login");
+        //QString login=request.getHeader("Login");
         int id=str_id.toInt();
         QString text;
-        bool b=false;
-        while(!b){
+        bool b=true;
+
+        QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
+        QJsonObject object=doc.object();
+
+        ClientState csClient (pM, login);
+        csClient.SetToken(authToken);
+        csClient.SetRoomsFromJson(object["RoomsState"].toArray());
+        csClient.SetLastEventsFromJson(object["EventsState"].toArray());
+
+
+           int ROOMid;
+            int thisId=0;
+
+
+
+        while(b){
+
+
+            int lastId=-1;
+
+        ClientState csServer (pM, login);
+        csServer.SetToken(authToken);
+        csServer.SetLastEvents(pMdb);
+        csServer.SetRooms(pMdb);
+
+
+
+
+        b=csServer.compareEvents(csClient, lastId, ROOMid);
+
+
+
+
+
             pM->lock();
-            b=pMdb->selectMessage(id, roomId, text);
+            //b=pMdb->selectMessage(id, roomId, text);
+            pMdb->selectSyncMessage(ROOMid, lastId, thisId, text); //ЗАПИСАТЬ ТЕКУЩИЙ ID
             pM->unlock();
-            if (!b){
-                std::chrono::milliseconds ms(30);
-                std::this_thread::sleep_for(ms);
-                }
+
+
+
+        qDebug()<<text;
+
+        if (!b){
+            std::chrono::milliseconds ms(30);
+            std::this_thread::sleep_for(ms);
             }
 
-        pM->lock();
+        }
+
+        /*pM->lock();
         QList<QJsonObject> roomsList= pMdb->selectRooms(login);
         pM->unlock();
         QJsonObject jsonObject;
@@ -50,7 +101,7 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
             RoomsArray.append(roomObject);
             count++;
         }
-        QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
+        QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);*/
 
         /*for(auto& el:roomsList)
         {
@@ -60,11 +111,16 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
            count++;
         }*/
 
-        jsonObject["Rooms"]=RoomsArray;
-        jsonObject["Authorization_token"]=authToken;
+        /*jsonObject["Rooms"]=RoomsArray;
+        jsonObject["Authorization_token"]=authToken;*/
 
-        //QJsonObject jsonObject;
-        jsonObject["one"]=text;
+        QJsonObject jsonObject;
+
+
+        jsonObject["Id"]=thisId;
+        jsonObject["IdRoom"]=ROOMid;
+        jsonObject["Content"]=text;
+
         response.setStatus(200, "OK");
         QJsonDocument document=QJsonDocument(jsonObject);
         QByteArray byte_array = document.toJson();

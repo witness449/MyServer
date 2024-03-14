@@ -57,3 +57,15 @@ QString MyRequestMapper::makeAccessToken(QString login, QList<QJsonObject> rooms
     }
     return authToken;
 }
+
+QMap<int, QString> MyRequestMapper::TokenParse(QString& accessToken, QString &login)
+{
+    QStringList pieces=accessToken.split(" ");
+    login=pieces[0];
+    QMap<int, QString> roomsTokens;
+    for (int i=1; i<pieces.size(); i+=2)
+    {
+         roomsTokens.insert(pieces[i].toInt(), pieces[i+1]);
+    }
+    return roomsTokens;
+}

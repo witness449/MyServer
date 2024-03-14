@@ -39,6 +39,12 @@ public:
     int selectRoom(); //Возвращает ID последней созданной комнаиты
     void createMessageTable(QString roomID);
 
+    QString selectAccessToken(QString login);
+    QMap <int, bool> selectRoomsForState(QString login);
+    QMap<int, int> selectTopMessages(QString login);
+    void selectSyncMessage(int idRoom, int lastId, int& thisId, QString& text);
+
+
 
 };
 

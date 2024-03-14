@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     synccontroller.cpp \
     sendcontroller.cpp \
     createroomcontroller.cpp \
-    global.cpp
+    global.cpp \
+    clientstate.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -36,7 +37,8 @@ HEADERS  += mainwindow.h \
     synccontroller.h \
     sendcontroller.h \
     createroomcontroller.h \
-    global.h
+    global.h \
+    clientstate.h
 
 
 

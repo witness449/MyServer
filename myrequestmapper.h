@@ -38,6 +38,8 @@ public:
     explicit MyRequestMapper(QObject *parent = 0, MyDatabase* pMDB=NULL, QMutex* pm=NULL);
     void service(HttpRequest& request, HttpResponse& response);
     static QString makeAccessToken(QString login, QList<QJsonObject> roomsList);
+    static QMap<int, QString> TokenParse(QString& accessToken, QString &login);
+
     ~MyRequestMapper();
 
 signals:
