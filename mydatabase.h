@@ -9,6 +9,8 @@
 #include <QSqlRecord>
 #include <QMultiMap>
 #include <QJsonObject>
+#include "user.h"
+#include "message.h"
 
 class MyDatabase
 {
@@ -27,23 +29,28 @@ public:
     void printTable();
 
     //Работа с данными
-    bool userInsert(QString, QString); //Внесение пользователя
-    QString selectUser (QString); //GetPassword
-    bool selectMessage(int, QString, QString&);//Выбор сообщения
-    void insertTestMessages(QString);
-    void insertMessage(QString, QString, QString);//Внесение сообщения
+    //Работа с пользователями
+    User selectUser (QString login);
+    //QString selectAccessToken(QString login);
+    bool insertUser(User); //Внесение пользователя
+    bool updateUser(User u);
+
+    bool selectMessage(Message & m, QString roomId);//Выбор сообщения
+    void insertMessage(Message);//Внесение сообщения
+
     void insertRoom(QString roomID); //Внесение чата
     void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
-    QList<QJsonObject> selectRooms(QString user); //Получение писка чата по пользователю
-    bool findUser(QString userLogin);
-    int selectRoom(); //Возвращает ID последней созданной комнаиты
-    void createMessageTable(QString roomID);
 
-    QString selectAccessToken(QString login);
+
+
+    //Получение выборок
+    QList<QJsonObject> selectRooms(QString user); //Получение писка чата по пользователю
+     int selectRoom(); //Возвращает ID последней созданной комнаиты
+    bool findUser(QString userLogin);
+    QString selectContact(QString client, int roomId);
     QMap <int, bool> selectRoomsForState(QString login);
     QMap<int, int> selectTopMessages(QString login);
     void selectSyncMessage(int idRoom, int lastId, int& thisId, QString& text);
-
 
 
 };

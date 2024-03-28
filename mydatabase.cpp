@@ -175,8 +175,8 @@ void MyDatabase::printTable(){
         qDebug()<<"db is not valid";
 }
 
-bool MyDatabase::userInsert(QString login, QString password){
-    QString selectExists="SELECT COUNT(1) FROM Users WHERE Login='"+login+"'";
+bool MyDatabase::insertUser(User u){
+    QString selectExists="SELECT COUNT(1) FROM Users WHERE Login='"+u.Login+"'";
     QSqlQuery query(myDB);
     query.prepare(selectExists);
     query.exec();
@@ -186,7 +186,7 @@ bool MyDatabase::userInsert(QString login, QString password){
     res1=query.value(0).toBool();
     if(!res1){
         if (myDB.isValid()){
-            QString insert ="INSERT INTO Users(Login, Password) VALUES ('"+login+"','"+password+"')";
+            QString insert ="INSERT INTO Users(Login, Password, AccessToken) VALUES ('"+u.Login+"','"+u.Password+"', '"+u.Login+"')";
             query.prepare(insert);
             query.exec(insert);
             query.prepare(selectExists);
@@ -199,7 +199,7 @@ bool MyDatabase::userInsert(QString login, QString password){
     else {return false;}
 }
 
-QString MyDatabase::selectUser(QString user)
+User MyDatabase::selectUser(QString user)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
@@ -207,28 +207,19 @@ QString MyDatabase::selectUser(QString user)
         qDebug()<<"Select query status: "<<query.exec(selectUser);
         query.next();
         QSqlRecord rec =query.record();
-        QString password=query.value(rec.indexOf("password")).toString();
-        qDebug()<<"password: "<<password;
-        return password;
+        User u;
+        u.Password=query.value(rec.indexOf("password")).toString();
+        u.AccessToken=query.value(rec.indexOf("AccessToken")).toString();
+        //qDebug()<<"password: "<<password;
+        return u;
     }
 }
 
-void MyDatabase::insertTestMessages(QString str)
-{
-    if (myDB.isValid()){
-        QSqlQuery query(myDB);
-        QString insert ="INSERT INTO TestMessagess"+str+"(text) VALUES ('test message')";
-        bool res=query.exec(insert);
-        qDebug()<<"Insert query status: "<<res;
-        if (!res) qDebug()<<query.lastError();
-        this->printTable();
-    }
-}
 
-bool MyDatabase::selectMessage(int messageId, QString roomId, QString& text)
+bool MyDatabase::selectMessage(Message & m, QString roomId)
 {
     QSqlQuery query(myDB);
-    QString message_id=QString::number(messageId);
+    QString message_id=QString::number(m.messageId);
     QString selectMessage="SELECT e.id, Content, Login FROM Events"+roomId+" e INNER JOIN Users u ON e.IdSender=u.Id WHERE e.Id="+message_id;
     query.exec(selectMessage);
     QSqlRecord rec =query.record();
@@ -237,7 +228,7 @@ bool MyDatabase::selectMessage(int messageId, QString roomId, QString& text)
         qDebug()<<"Id: "<<query.value(rec.indexOf("e.Id")).toInt()
         <<"Content: "<<query.value(rec.indexOf("Content")).toString()
         <<"Sender: "<<query.value(rec.indexOf("Login")).toString();
-        text=query.value(rec.indexOf("Login")).toString()+": "+query.value(rec.indexOf("Content")).toString();
+        m.content=query.value(rec.indexOf("Login")).toString()+": "+query.value(rec.indexOf("Content")).toString();
         }
     QString selectExists="SELECT COUNT(1) FROM Events"+roomId+" WHERE Id='"+message_id+"'";
     query.prepare(selectExists);
@@ -248,11 +239,11 @@ bool MyDatabase::selectMessage(int messageId, QString roomId, QString& text)
     return res;
 }
 
-void MyDatabase::insertMessage(QString message, QString str, QString login)
+void MyDatabase::insertMessage(Message m)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO Events (Content, IdRoom, idSender) VALUES ('"+message+"', "+str+", (SELECT Id FROM Users WHERE Login='"+login+"'))";
+        QString insert ="INSERT INTO Events (Content, IdRoom, idSender) VALUES ('"+m.content+"', "+m.idRoom+", (SELECT Id FROM Users WHERE Login='"+m.senderLogin+"'))";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
@@ -332,16 +323,7 @@ int MyDatabase::selectRoom()
     return res;
 }
 
-void MyDatabase::createMessageTable(QString roomID)
-{
-    QSqlQuery query(myDB);
-    QString create="CREATE TABLE Events"+roomID+" (Id INTEGER  PRIMARY KEY IDENTITY (1,1), IdRoom INTEGER NOT NULL, Content NVARCHAR(255) NOT NULL, IdSender INTEGER, TimeStamp DATETIME)";
-    //QString create ="CREATE TABLE TestMessagess"+roomID+" (id INTEGER  PRIMARY KEY IDENTITY (1,1), text  VARCHAR (255))";
-    query.exec(create);
-}
-
-
-QString MyDatabase::selectAccessToken(QString userLogin)
+/*QString MyDatabase::selectAccessToken(QString userLogin)
 {
     QSqlQuery query(myDB);
     QString selectTop="SELECT AccessToken FROM Users WHERE Login='"+userLogin+"'";
@@ -350,7 +332,7 @@ QString MyDatabase::selectAccessToken(QString userLogin)
     query.next();
     QString res=query.value(0).toString();
     return res;
-}
+}*/
 
 
 QMap <int, bool> MyDatabase::selectRoomsForState(QString login)
@@ -421,3 +403,31 @@ void MyDatabase::selectSyncMessage(int idRoom, int lastId, int& thisId, QString&
     qDebug()<<message_id;
 
 }
+
+bool MyDatabase::updateUser(User u)
+{
+     if (myDB.isValid()){
+         QSqlQuery query(myDB);
+         QString update="UPDATE USERS SET AccessToken='"+u.AccessToken+"' WHERE Login='"+u.Login+"'";
+         bool res=query.exec(update);
+         return res;
+      }
+}
+
+QString MyDatabase::selectContact(QString client, int roomId)
+{
+    QSqlQuery query(myDB);
+    QString contact;
+    QString select="SELECT us.Login FROM ROOMS r "
+            "JOIN RoomssUsers ru ON r.Id=ru.IdRoom "
+            "JOIN Users us ON ru.IdUser=us.Id "
+            "WHERE r.id="+QString::number(roomId)+" AND ru.IdUser!=(SELECT id FROM Users u WHERE u.Login='"+client+"')";
+    query.exec(select);
+    QSqlRecord rec =query.record();
+    while (query.next()){
+        contact=query.value(rec.indexOf("Login")).toString();
+    }
+    return contact;
+}
+
+

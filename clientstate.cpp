@@ -122,3 +122,18 @@ bool ClientState::compareEvents(ClientState& other, int& eventId, int& roomId)
     roomId=-1;
     return true;
 }
+
+bool ClientState::compareRooms(ClientState& other, int& roomId)
+{
+    for(auto i=Rooms.begin(); i!=Rooms.end(); i++)
+    {
+        auto it=other.Rooms.find(i.key());
+        if (it==other.Rooms.end())
+        {
+            roomId=i.key();
+            return false;
+        }
+    }
+    roomId=-1;
+    return true;
+}

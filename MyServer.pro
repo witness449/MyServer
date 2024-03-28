@@ -38,7 +38,9 @@ HEADERS  += mainwindow.h \
     sendcontroller.h \
     createroomcontroller.h \
     global.h \
-    clientstate.h
+    clientstate.h \
+    user.h \
+    message.h
 
 
 

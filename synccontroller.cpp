@@ -20,7 +20,7 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
     QString tmpToken;
 
     pM->lock();
-    tmpToken=pMdb->selectAccessToken(login);
+    tmpToken=pMdb->selectUser(login).AccessToken;
     pM->unlock();
 
     if (tmpToken==authToken)
@@ -44,6 +44,10 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
            int ROOMid;
             int thisId=0;
 
+            int newRoomId;
+
+            bool newEvent=true;
+
 
 
         while(b){
@@ -60,21 +64,28 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
 
 
         b=csServer.compareEvents(csClient, lastId, ROOMid);
-
-
-
-
-
-            pM->lock();
-            //b=pMdb->selectMessage(id, roomId, text);
-            pMdb->selectSyncMessage(ROOMid, lastId, thisId, text); //ЗАПИСАТЬ ТЕКУЩИЙ ID
-            pM->unlock();
-
-
-
+        if (!b)
+        {
+        pM->lock();
+       //b=pMdb->selectMessage(id, roomId, text);
+        pMdb->selectSyncMessage(ROOMid, lastId, thisId, text); //ЗАПИСАТЬ ТЕКУЩИЙ ID
+        pM->unlock();
         qDebug()<<text;
+        }
+        if (b)
+        {
+            b=csServer.compareRooms(csClient, newRoomId);
+            if(!b)
+            {
+                newEvent=false;
+            }
+        }
 
-        if (!b){
+
+
+
+
+        if (b){
             std::chrono::milliseconds ms(30);
             std::this_thread::sleep_for(ms);
             }
@@ -116,10 +127,62 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
 
         QJsonObject jsonObject;
 
-
+        if(newEvent)
+        {
+        jsonObject["type"]=0;
         jsonObject["Id"]=thisId;
         jsonObject["IdRoom"]=ROOMid;
         jsonObject["Content"]=text;
+        }
+
+        else
+        {
+            pM->lock();
+            QList<QJsonObject> roomsList= pMdb->selectRooms(login);
+            pM->unlock();
+            //jsonObject["Authorization_token"]="pass_from_server";
+            //QString authToken=jsonObject["Authorization_token"].toString();
+            int count=1;
+            QJsonArray RoomsArray;
+
+            for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i)
+            {
+                QString str_count=QString::number(count);
+                jsonObject[str_count+"Room"]=(*i)["Id"].toString()+" "+(*i)["Login"].toString();
+                //authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
+                QJsonObject roomObject;
+                roomObject["id"]=(*i)["Id"];
+                roomObject["login"]=(*i)["Login"].toString();
+                RoomsArray.append(roomObject);
+                count++;
+            }
+
+            /*for(auto& el:roomsList)
+            {
+               QString str_count=QString::number(count);
+               jsonObject[str_count+"Room"]=el;
+               authToken+="_"+el;
+               count++;
+            }*/
+
+            QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
+            QString roomName;
+
+            pM->lock();
+            User u;
+            u.Login=login;
+            u.AccessToken=authToken;
+            pMdb->updateUser(u);
+            roomName=pMdb->selectContact(login, newRoomId);
+            pM->unlock();
+
+            jsonObject["type"]=1;
+            jsonObject["idRoom"]=newRoomId;
+            jsonObject["RoomName"]=roomName;
+            jsonObject["Authorization_token"]=authToken;
+
+        }
+
 
         response.setStatus(200, "OK");
         QJsonDocument document=QJsonDocument(jsonObject);

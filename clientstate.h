@@ -34,6 +34,7 @@ public:
     QJsonObject ToJson();
 
     bool compareEvents(ClientState& other, int&, int&);
+    bool compareRooms(ClientState& other, int&);
 
 };
 #endif // CLIENTSTATE_H

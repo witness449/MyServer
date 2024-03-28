@@ -10,10 +10,11 @@ SendController::SendController(QObject *parent) :
 void SendController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
     QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
     QJsonObject object=doc.object();
-    QString message=object["message"].toString();
-    QString roomId=object["room_id"].toString();
-    QString login=object["login"].toString();
+    Message m;
+    m.content=object["message"].toString();
+    m.idRoom=object["room_id"].toString();
+    m.senderLogin=object["login"].toString();
     pM->lock();
-    pMdb->insertMessage(message, roomId, login);
+    pMdb->insertMessage(m);
     pM->unlock();
 }

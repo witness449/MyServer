@@ -18,8 +18,12 @@ void RegController::service(HttpRequest &request, HttpResponse &response, MyData
         QString login=object["Login"].toString();
         QString password=object["Password"].toString();
 
+        User u;
+        u.Login=login;
+        u.Password=password;
+
         pM->lock();
-        bool res=pMdb->userInsert(login, password);
+        bool res=pMdb->insertUser(u);
         pM->unlock();
 
         if (res){

@@ -50,7 +50,7 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
     if (object["session"].toString()==sessionId)
     {
     pM->lock();
-    QString passwordFromDb=pMdb->selectUser(login);
+    QString passwordFromDb=pMdb->selectUser(login).Password;
     pM->unlock();
 
     if (password==passwordFromDb)
@@ -86,7 +86,11 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
            count++;
         }*/
 
-        QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
+        //QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
+
+        pM->lock();
+        QString authToken=pMdb->selectUser(login).AccessToken;
+        pM->unlock();
 
         jsonObject["Rooms"]=RoomsArray;
         jsonObject["Authorization_token"]=authToken;
