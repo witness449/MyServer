@@ -8,7 +8,7 @@ MyRequestMapper::MyRequestMapper(QObject *parent, MyDatabase* pMDB, QMutex* pm) 
 {
     //pMdb=pMDB;
     pMdb=new MyDatabase();
-    pMdb->createConnection();
+    //pMdb->createConnection();
     //pMdb->dropTable();
     //pMdb->createTable();
     pM=new QMutex;
@@ -32,8 +32,11 @@ void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
     else if(path=="/send"){
         sendController.service(request, response, pMdb, pM);
     }
-    else if(path=="/stop"){
-
+    else if(path=="/ban"){
+        banController.service(request, response, pMdb, pM);
+    }
+    else if(path=="/unban"){
+        unbanController.service(request, response, pMdb, pM);
     }
     else if (path=="/create_room"){
         createRoomController.service(request, response, pMdb, pM);

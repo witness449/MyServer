@@ -23,19 +23,32 @@ void RegController::service(HttpRequest &request, HttpResponse &response, MyData
         u.Password=password;
 
         pM->lock();
-        bool res=pMdb->insertUser(u);
+        bool exists=pMdb->userExists(login);
         pM->unlock();
 
+        if (!exists)
+        {
+        pM->lock();
+        bool res=pMdb->insertUser(u);
+        pM->unlock();
         if (res){
             response.setStatus(200, "OK");
         }
         else{
-            response.setStatus(403, "Forbidden");
+            response.setStatus(403, "Unimposible");
         }
+
+        }
+        else
+        {
+            response.setStatus(400, "User in use");
+        }
+
+
         //pMdb->printTable();
     }
     else{
-        response.setStatus(403, "Forbidden");
+        response.setStatus(404, "Unknown");
     }
 }
 

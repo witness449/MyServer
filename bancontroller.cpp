@@ -1,42 +1,29 @@
-#include "createroomcontroller.h"
+#include "bancontroller.h"
+#include "room.h"
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QTime>
-#include "myrequestmapper.h"
 
-
-QString RandomGenerator()
-{
-    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
-
-    int randInt;
-    QString myString;
-    for(int i=0; i<5; i++)
-    {
-    randInt = qrand()%('Z'-'A'+1)+'A';
-    myString.append(randInt);
-    }
-    return myString;
-}
-
-
-CreateRoomController::CreateRoomController(QObject *parent) :
+BanController::BanController(QObject *parent) :
     HttpRequestHandler(parent)
 {
 }
 
-void CreateRoomController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
+
+void BanController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
     QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
     QJsonObject object=doc.object();
 
     QString creatorLogin=object["creatorLogin"].toString();
-    QString userLogin=object["clientLogin"].toString();
+    int idRoom=object["idRoom"].toString().toInt();
+    Room r;
+    r.Id=idRoom;
+    r.isActive=0;
 
     pM->lock();
-    bool res=pMdb->findUser(userLogin);
+    pMdb->updateRoom(r);
     pM->unlock();
 
-    if (res){
+    /*if (res){
         pMdb->insertRoom(creatorLogin+"AND"+userLogin);
         pM->lock();
         //std::string tmp = std::to_string(pMdb->selectRoom());
@@ -72,6 +59,6 @@ void CreateRoomController::service(HttpRequest &request, HttpResponse &response,
         response.setStatus(200, "OK");
     }
     else{
-        response.setStatus(400, "Unknown");
-    }
+        response.setStatus(403, "Forbidden");
+    }*/
 }

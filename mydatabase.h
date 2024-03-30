@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include "user.h"
 #include "message.h"
+#include "room.h"
 
 class MyDatabase
 {
@@ -40,6 +41,7 @@ public:
 
     void insertRoom(QString roomID); //Внесение чата
     void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
+    void updateRoom(Room r);
 
 
 
@@ -51,6 +53,8 @@ public:
     QMap <int, bool> selectRoomsForState(QString login);
     QMap<int, int> selectTopMessages(QString login);
     void selectSyncMessage(int idRoom, int lastId, int& thisId, QString& text);
+    void selectRoomByLogins(QString login1, QString login2, int&);
+    bool userExists(QString login);
 
 
 };

@@ -123,17 +123,32 @@ bool ClientState::compareEvents(ClientState& other, int& eventId, int& roomId)
     return true;
 }
 
-bool ClientState::compareRooms(ClientState& other, int& roomId)
+bool ClientState::compareRooms(ClientState& other, int& roomId, int& roomBanId)
 {
     for(auto i=Rooms.begin(); i!=Rooms.end(); i++)
     {
         auto it=other.Rooms.find(i.key());
         if (it==other.Rooms.end())
         {
+            roomBanId=0;
             roomId=i.key();
             return false;
         }
     }
+
+    for(auto i=other.Rooms.begin(); i!=other.Rooms.end(); i++)
+    {
+        auto it=Rooms.find(i.key());
+        if (it==Rooms.end())
+        {
+            roomId=0;
+            roomBanId=i.key();
+            qDebug()<<"BAN"<<roomBanId;
+            return false;
+        }
+    }
+
+
     roomId=-1;
     return true;
 }

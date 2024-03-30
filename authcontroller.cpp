@@ -103,12 +103,12 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
     }
     else
     {
-        response.setStatus(401, "Unauthorized");
+        response.setStatus(403, "Forbidden");
     }
     }
     else
     {
-        response.setStatus(401, "Unauthorized");
+        response.setStatus(400, "Unknown");
     }
 }
 

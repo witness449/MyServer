@@ -5,7 +5,10 @@
 
 int MyDatabase::count=0;
 
-MyDatabase::MyDatabase(){}
+MyDatabase::MyDatabase()
+{
+    this->createConnection();
+}
 
 void MyDatabase::createConnection(){
     QFile file ("dbconfig.txt");
@@ -271,6 +274,16 @@ void MyDatabase::insertUserRoom(QString User, int Room, QString access_token)
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
+    }
+}
+
+void MyDatabase::updateRoom(Room r)
+{
+    if (myDB.isValid()){
+        QSqlQuery query(myDB);
+        QString update="UPDATE ROOMS SET IsActive='"+QString::number(r.isActive)+"' WHERE Id='"+QString::number(r.Id)+"'";
+        bool res=query.exec(update);
+        //return res;
      }
 }
 
@@ -342,7 +355,7 @@ QMap <int, bool> MyDatabase::selectRoomsForState(QString login)
         QString selectRooms="SELECT r.Id, r.IsActive FROM Rooms r "
                             "INNER JOIN RoomssUsers ru ON r.Id=ru.IdRoom "
                             "INNER JOIN Users u ON ru.IdUser=u.Id "
-                            "WHERE u.Login='"+login+"'";
+                            "WHERE u.Login='"+login+"' AND r.IsActive=1";
          bool res=query.exec(selectRooms);
          QSqlRecord rec =query.record();
 
@@ -404,6 +417,37 @@ void MyDatabase::selectSyncMessage(int idRoom, int lastId, int& thisId, QString&
 
 }
 
+void MyDatabase::selectRoomByLogins(QString login1, QString login2, int& id)
+{
+
+    QSqlQuery query(myDB);
+    QString selectMessage="SELECT ru1.IdRoom FROM RoomssUsers ru1 "
+             "INNER JOIN RoomssUsers ru2 ON ru1.IdRoom=ru2.IdRoom  "
+             "WHERE ru1.IdUser=(SELECT Id FROM USERS WHERE Login='"+login1+"') AND ru2.IdUser=(SELECT Id FROM USERS WHERE Login='"+login2+"')";
+
+    query.exec(selectMessage);
+
+    QSqlRecord rec =query.record();
+    bool res;
+    while (query.next()){
+        id=query.value(rec.indexOf("IdRoom")).toInt();
+       }
+
+
+}
+
+bool MyDatabase::userExists(QString login)
+{
+    bool res;
+    QSqlQuery query(myDB);
+    QString selectExists="SELECT COUNT(1) FROM USERS WHERE Login='"+login+"'";
+    query.prepare(selectExists);
+    query.exec();
+    query.next();
+    res=query.value(0).toBool();
+    return res;
+}
+
 bool MyDatabase::updateUser(User u)
 {
      if (myDB.isValid()){
@@ -429,5 +473,7 @@ QString MyDatabase::selectContact(QString client, int roomId)
     }
     return contact;
 }
+
+
 
 

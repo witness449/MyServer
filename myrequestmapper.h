@@ -9,6 +9,8 @@
 #include "synccontroller.h"
 #include "sendcontroller.h"
 #include "createroomcontroller.h"
+#include "bancontroller.h"
+#include "unbancontroller.h"
 #include "mydatabase.h"
 #include <QMutex>
 #include <QTcpSocket>
@@ -28,6 +30,8 @@ private:
     SyncController syncController; //Контроллер по конечной точке /sync
     SendController sendController; //Контроллер по конечной точке /send
     CreateRoomController createRoomController; //Контроллер по конечной точке /create_room
+    BanController banController;
+    UnbanController unbanController;
     MyController myController;
 
     MyDatabase* pMdb;

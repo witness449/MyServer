@@ -45,6 +45,7 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
             int thisId=0;
 
             int newRoomId;
+            int banRoomId;
 
             bool newEvent=true;
 
@@ -74,7 +75,7 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
         }
         if (b)
         {
-            b=csServer.compareRooms(csClient, newRoomId);
+            b=csServer.compareRooms(csClient, newRoomId, banRoomId);
             if(!b)
             {
                 newEvent=false;
@@ -177,7 +178,16 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
             pM->unlock();
 
             jsonObject["type"]=1;
+            if (newRoomId)
+            {
             jsonObject["idRoom"]=newRoomId;
+            jsonObject["banRoom"]="0";
+            }
+            if (banRoomId)
+            {
+            jsonObject["banRoom"]=banRoomId;
+            jsonObject["idRoom"]="0";
+            }
             jsonObject["RoomName"]=roomName;
             jsonObject["Authorization_token"]=authToken;
 

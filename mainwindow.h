@@ -14,12 +14,12 @@
 
 using namespace stefanfrings;
 
-namespace Ui {
+/*namespace Ui {
 class MainWindow;
-}
+}*/
 
 //На случай развития сервера возможно добавление нтерфейса администратора
-class MainWindow : public QMainWindow
+class MainWindow : public QObject
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ public:
     ~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
+    //Ui::MainWindow *ui;
 
     //Указатель на объект взаимодействия с БД
     MyDatabase* pMyDB;
