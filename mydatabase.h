@@ -37,11 +37,15 @@ public:
     bool updateUser(User u);
 
     bool selectMessage(Message & m, QString roomId);//Выбор сообщения
-    void insertMessage(Message);//Внесение сообщения
+    bool insertMessage(Message);//Внесение сообщения
 
-    void insertRoom(QString roomID); //Внесение чата
-    void insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
-    void updateRoom(Room r);
+    Room selectRoom(int roomID);
+    bool insertRoom(QString roomID); //Внесение чата
+    bool insertUserRoom(QString user, int room, QString access_token=""); //Соотнесение пользователя и чата
+    bool updateRoom(Room r);
+
+    bool insertBlackList(int idWhoBan, int idWhoBanned);
+    bool deleteBlackList(int idWhoBan, int idWhoBanned);
 
 
 
@@ -49,14 +53,19 @@ public:
     QList<QJsonObject> selectRooms(QString user); //Получение писка чата по пользователю
      int selectRoom(); //Возвращает ID последней созданной комнаиты
     bool findUser(QString userLogin);
-    QString selectContact(QString client, int roomId);
+    User selectContact(QString client, int roomId);
     QMap <int, bool> selectRoomsForState(QString login);
     QMap<int, int> selectTopMessages(QString login);
     void selectSyncMessage(int idRoom, int lastId, int& thisId, QString& text);
     void selectRoomByLogins(QString login1, QString login2, int&);
     bool userExists(QString login);
+    bool checkIfBan(int idWhoBan, int idWhoBanned);
+    bool checkAccess(QString senderLogin, QString accessToken);
+
 
 
 };
+
+
 
 #endif // MYDATABASE_H

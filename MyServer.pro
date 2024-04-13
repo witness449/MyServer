@@ -26,8 +26,9 @@ SOURCES += main.cpp\
     createroomcontroller.cpp \
     global.cpp \
     clientstate.cpp \
-    bancontroller.cpp \
-    unbancontroller.cpp
+    unbancontroller.cpp \
+    leavecontroller.cpp \
+    bancontroller.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -43,9 +44,10 @@ HEADERS  += mainwindow.h \
     clientstate.h \
     user.h \
     message.h \
-    bancontroller.h \
     room.h \
-    unbancontroller.h
+    unbancontroller.h \
+    leavecontroller.h \
+    bancontroller.h
 
 
 

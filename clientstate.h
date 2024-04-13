@@ -11,27 +11,27 @@
 class ClientState
 {
 private:
-    QString AccessToken;
-    QMap <int, bool> Rooms;
-    QMap<int, int> Events;
-    QString Login;
+    QString accessToken;
+    QMap <int, bool> rooms;
+    QMap<int, int> events;
+    QString login;
     QMutex* pM;
 
 public:
     ClientState(QMutex*, QString login);
-    QString GetToken();
-    QMap<int, bool> GetActiveRooms();
-    QMap<int, int> GetLastEvents();
+    QString getToken();
+    QMap<int, bool> getActiveRooms();
+    QMap<int, int> getLastEvents();
 
-    void SetToken(QString token);
-    void SetRooms(MyDatabase* pMDB);
-    void SetLastEvents(MyDatabase* pMDB);
+    void setToken(QString token);
+    void setRooms(MyDatabase* pMDB);
+    void setLastEvents(MyDatabase* pMDB);
 
-    void SetRoomsFromJson(QJsonArray roomsArr);
-    void SetLastEventsFromJson(QJsonArray eventsArr);
+    void setRoomsFromJson(QJsonArray roomsArr);
+    void setLastEventsFromJson(QJsonArray eventsArr);
 
     ClientState& operator=(const ClientState& cs);
-    QJsonObject ToJson();
+    QJsonObject toJson();
 
     bool compareEvents(ClientState& other, int&, int&);
     bool compareRooms(ClientState& other, int&, int&);

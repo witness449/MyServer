@@ -16,11 +16,11 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
     QString login;
     QMap<int, QString> roomsTokens;
 
-    roomsTokens=MyRequestMapper::TokenParse(authToken, login);
+    roomsTokens=MyRequestMapper::tokenParse(authToken, login);
     QString tmpToken;
 
     pM->lock();
-    tmpToken=pMdb->selectUser(login).AccessToken;
+    tmpToken=pMdb->selectUser(login).accessToken;
     pM->unlock();
 
     if (tmpToken==authToken)
@@ -36,9 +36,9 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
         QJsonObject object=doc.object();
 
         ClientState csClient (pM, login);
-        csClient.SetToken(authToken);
-        csClient.SetRoomsFromJson(object["RoomsState"].toArray());
-        csClient.SetLastEventsFromJson(object["EventsState"].toArray());
+        csClient.setToken(authToken);
+        csClient.setRoomsFromJson(object["RoomsState"].toArray());
+        csClient.setLastEventsFromJson(object["EventsState"].toArray());
 
 
            int ROOMid;
@@ -57,9 +57,9 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
             int lastId=-1;
 
         ClientState csServer (pM, login);
-        csServer.SetToken(authToken);
-        csServer.SetLastEvents(pMdb);
-        csServer.SetRooms(pMdb);
+        csServer.setToken(authToken);
+        csServer.setLastEvents(pMdb);
+        csServer.setRooms(pMdb);
 
 
 
@@ -166,15 +166,17 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
                count++;
             }*/
 
+            //ОБНОВИТЬ ТОКНН ЗАБАННЕННОГО!!!
+
             QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
             QString roomName;
 
             pM->lock();
             User u;
-            u.Login=login;
-            u.AccessToken=authToken;
+            u.login=login;
+            u.accessToken=authToken;
             pMdb->updateUser(u);
-            roomName=pMdb->selectContact(login, newRoomId);
+            roomName=pMdb->selectContact(login, newRoomId).login;
             pM->unlock();
 
             jsonObject["type"]=1;

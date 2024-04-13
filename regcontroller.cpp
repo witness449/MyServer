@@ -7,48 +7,53 @@ RegController::RegController(QObject *parent) :
 {
 }
 
-void RegController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
-    if (request.getMethod()=="POST")
-    {
-        //regController.service(request, response);
-        response.setHeader("Request-type", "Registration");
-        QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
-        QJsonObject object=doc.object();
+void RegController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM){
+    if (request.getMethod()!="POST"){
+           response.setStatus(404, "Not_found");
+           return;
+    }
 
-        QString login=object["Login"].toString();
-        QString password=object["Password"].toString();
+    response.setHeader("Request-type", "Registration");
+    QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
+    QJsonObject object=doc.object();
 
-        User u;
-        u.Login=login;
-        u.Password=password;
+    if (object["type"].toString()!="m.login.password"){
+        response.setStatus(400, "Unknown");
+        return;
+    }
 
-        pM->lock();
-        bool exists=pMdb->userExists(login);
-        pM->unlock();
+    QString login=object["identifier"].toString();
+    QString password=object["password"].toString();
 
-        if (!exists)
-        {
+    if (login.length()>10||password.length()>10){
+        response.setStatus(400, "Invalid_user_name");
+        return;
+    }
+
+    User u;
+    u.login=login;
+    u.password=password;
+
+    pM->lock();
+    bool exists=pMdb->userExists(login);
+    pM->unlock();
+
+    if (!exists){
         pM->lock();
         bool res=pMdb->insertUser(u);
         pM->unlock();
+
         if (res){
             response.setStatus(200, "OK");
         }
         else{
             response.setStatus(403, "Unimposible");
         }
-
-        }
-        else
-        {
-            response.setStatus(400, "User in use");
-        }
-
-
-        //pMdb->printTable();
-    }
-    else{
-        response.setStatus(404, "Unknown");
-    }
+   }
+   else{
+        response.setStatus(400, "User_in_use");
+   }
 }
+
+
 

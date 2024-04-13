@@ -5,10 +5,11 @@
 
 struct User
 {
-    QString Login;
-    QString Password;
-    QString DisplayName;
-    QString AccessToken;
+    QString id;
+    QString login;
+    QString password;
+    QString displayName;
+    QString accessToken;
 };
 
 #endif // USER_H

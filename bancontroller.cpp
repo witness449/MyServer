@@ -8,57 +8,48 @@ BanController::BanController(QObject *parent) :
 {
 }
 
-
 void BanController::service(HttpRequest &request, HttpResponse &response, MyDatabase* pMdb, QMutex* pM) {
     QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
+
+    if (request.getMethod()!="POST"){
+           response.setStatus(404, "Not_found");
+           return;
+    }
+
+    response.setHeader("Request-type", "Ban");
+
     QJsonObject object=doc.object();
+    QString creatorLogin=object["admin_id"].toString();
+    int idRoom=object["room_id"].toString().toInt();
+    QString accessToken=object["access_token"].toString();
 
-    QString creatorLogin=object["creatorLogin"].toString();
-    int idRoom=object["idRoom"].toString().toInt();
-    Room r;
-    r.Id=idRoom;
-    r.isActive=0;
+    bool permission=pMdb->checkAccess(creatorLogin, accessToken);
 
-    pM->lock();
-    pMdb->updateRoom(r);
-    pM->unlock();
-
-    /*if (res){
-        pMdb->insertRoom(creatorLogin+"AND"+userLogin);
+    if (permission){
+        Room r;
+        r.id=idRoom;
+        r.isActive=0;
         pM->lock();
-        //std::string tmp = std::to_string(pMdb->selectRoom());
-        //char const *roomID = tmp.c_str();
-        int roomID=pMdb->selectRoom();
-        pMdb->insertUserRoom(userLogin, roomID, RandomGenerator());
-        pMdb->insertUserRoom(creatorLogin, roomID, RandomGenerator());
-
-        QString str_roomID=QString::number(roomID);
-
-        //pMdb->createMessageTable(str_roomID);
-
+        bool resUpd=pMdb->updateRoom(r);
+        User whoBanned;
+        whoBanned=pMdb->selectContact(creatorLogin, idRoom);
+        int idWhoBanned=whoBanned.id.toInt();
+        User whoBan=pMdb->selectUser(creatorLogin);
+        int idWhoBan=whoBan.id.toInt();
+        bool resIns=pMdb->insertBlackList(idWhoBan, idWhoBanned);
         pM->unlock();
-        QList<QJsonObject> roomsListCreator= pMdb->selectRooms(creatorLogin);
-        QList<QJsonObject> roomsListClient= pMdb->selectRooms(userLogin);
-
-        QString creatorToken=MyRequestMapper::makeAccessToken(creatorLogin, roomsListCreator);
-        QString userToken=MyRequestMapper::makeAccessToken(userLogin, roomsListClient);
-
-        User creator;
-        creator.Login=creatorLogin;
-        creator.AccessToken=creatorToken;
-        User user;
-        user.AccessToken=userToken;
-        user.Login=userLogin;
-
-        pM->lock();
-        pMdb->updateUser(creator);
-        pMdb->updateUser(user);
-        pM->unlock();
-
-
-        response.setStatus(200, "OK");
+        if (resUpd&resIns){
+            response.setStatus(200, "Ok");
+        }
+        else{
+            response.setStatus(400, "Unknown");
+        }
     }
     else{
         response.setStatus(403, "Forbidden");
-    }*/
+    }
+
+
+
+
 }

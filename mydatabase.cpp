@@ -179,7 +179,7 @@ void MyDatabase::printTable(){
 }
 
 bool MyDatabase::insertUser(User u){
-    QString selectExists="SELECT COUNT(1) FROM Users WHERE Login='"+u.Login+"'";
+    QString selectExists="SELECT COUNT(1) FROM Users WHERE Login='"+u.login+"'";
     QSqlQuery query(myDB);
     query.prepare(selectExists);
     query.exec();
@@ -189,7 +189,7 @@ bool MyDatabase::insertUser(User u){
     res1=query.value(0).toBool();
     if(!res1){
         if (myDB.isValid()){
-            QString insert ="INSERT INTO Users(Login, Password, AccessToken) VALUES ('"+u.Login+"','"+u.Password+"', '"+u.Login+"')";
+            QString insert ="INSERT INTO Users(Login, Password, AccessToken) VALUES ('"+u.login+"','"+u.password+"', '"+u.login+"')";
             query.prepare(insert);
             query.exec(insert);
             query.prepare(selectExists);
@@ -211,8 +211,9 @@ User MyDatabase::selectUser(QString user)
         query.next();
         QSqlRecord rec =query.record();
         User u;
-        u.Password=query.value(rec.indexOf("password")).toString();
-        u.AccessToken=query.value(rec.indexOf("AccessToken")).toString();
+        u.password=query.value(rec.indexOf("password")).toString();
+        u.id=query.value(rec.indexOf("id")).toString();
+        u.accessToken=query.value(rec.indexOf("AccessToken")).toString();
         //qDebug()<<"password: "<<password;
         return u;
     }
@@ -242,48 +243,66 @@ bool MyDatabase::selectMessage(Message & m, QString roomId)
     return res;
 }
 
-void MyDatabase::insertMessage(Message m)
+bool MyDatabase::insertMessage(Message m)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString insert ="INSERT INTO Events (Content, IdRoom, idSender) VALUES ('"+m.content+"', "+m.idRoom+", (SELECT Id FROM Users WHERE Login='"+m.senderLogin+"'))";
+        QString insert ="INSERT INTO Events (Content, IdRoom, idSender, TimeStamp) VALUES ('"+m.content+"', "+m.idRoom+", (SELECT Id FROM Users WHERE Login='"+m.senderLogin+"'), GETDATE())";
         bool res=query.exec(insert);
         qDebug()<<"Insert query status: "<<res;
         if (!res) qDebug()<<query.lastError();
-        this->printTable();
+        return res;
     }
 }
 
-void MyDatabase::insertRoom(QString text)
+Room MyDatabase::selectRoom(int roomID)
+{
+    Room result;
+    if (myDB.isValid()){
+        QSqlQuery query(myDB);
+        QString insert ="SELECT * FROM Rooms WHERE Id="+QString::number(roomID);
+        query.exec(insert);
+        QSqlRecord rec =query.record();
+
+
+
+        while (query.next()){
+            result.id=query.value(rec.indexOf("Id")).toInt();
+            result.name=query.value(rec.indexOf("Name")).toString();
+            result.isActive=query.value(rec.indexOf("IsActive")).toInt();
+            }
+
+    }
+    return result;
+}
+
+bool MyDatabase::insertRoom(QString text)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
         QString insert ="INSERT INTO Rooms(Name, IsActive) VALUES ('"+text+"', 1)";
         bool res=query.exec(insert);
-        qDebug()<<"Insert query status: "<<res;
-        if (!res) qDebug()<<query.lastError();
-        this->printTable();
+        return res;
     }
 }
 
-void MyDatabase::insertUserRoom(QString User, int Room, QString access_token)
+bool MyDatabase::insertUserRoom(QString User, int Room, QString access_token)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
         QString insert ="INSERT INTO RoomssUsers (IdUser, IdRoom, AccessToken) VALUES ((SELECT Id FROM Users WHERE Login='"+User+"'), "+QString::number(Room)+",'"+access_token+"')";
         bool res=query.exec(insert);
-        qDebug()<<"Insert query status: "<<res;
-        if (!res) qDebug()<<query.lastError();
+        return res;
     }
 }
 
-void MyDatabase::updateRoom(Room r)
+bool MyDatabase::updateRoom(Room r)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
-        QString update="UPDATE ROOMS SET IsActive='"+QString::number(r.isActive)+"' WHERE Id='"+QString::number(r.Id)+"'";
+        QString update="UPDATE ROOMS SET IsActive='"+QString::number(r.isActive)+"' WHERE Id='"+QString::number(r.id)+"'";
         bool res=query.exec(update);
-        //return res;
+        return res;
      }
 }
 
@@ -401,7 +420,7 @@ void MyDatabase::selectSyncMessage(int idRoom, int lastId, int& thisId, QString&
     QSqlQuery query(myDB);
     QString message_id=QString::number(lastId);
     QString idRoomStr=QString::number(idRoom);
-    QString selectMessage="SELECT TOP (1) e.Id as Id, Content, Login FROM Events e INNER JOIN Users u ON e.IdSender=u.Id WHERE IdRoom="+idRoomStr+" AND e.Id>"+message_id+"  ORDER BY e.Id";
+    QString selectMessage="SELECT TOP (1) e.Id as Id, Content, Login, DAY(timestamp) as evDay, MONTH(timestamp) as evMonth, DATEPART(HOUR, timestamp) as evHour,  DATEPART(MINUTE, timestamp) as evMin FROM Events e INNER JOIN Users u ON e.IdSender=u.Id WHERE IdRoom="+idRoomStr+" AND e.Id>"+message_id+"  ORDER BY e.Id";
 
     query.exec(selectMessage);
     QSqlRecord rec =query.record();
@@ -411,7 +430,7 @@ void MyDatabase::selectSyncMessage(int idRoom, int lastId, int& thisId, QString&
         qDebug()<<query.value(rec.indexOf("Id")).toInt();
         qDebug()<<"Content: "<<query.value(rec.indexOf("Content")).toString()
         <<"Sender: "<<query.value(rec.indexOf("Login")).toString();
-        text=query.value(rec.indexOf("Login")).toString()+": "+query.value(rec.indexOf("Content")).toString();
+        text=query.value(rec.indexOf("Login")).toString()+" "+query.value(rec.indexOf("evHour")).toString()+":"+query.value(rec.indexOf("evMin")).toString()+" : "+query.value(rec.indexOf("Content")).toString();
         }
     qDebug()<<message_id;
 
@@ -448,32 +467,74 @@ bool MyDatabase::userExists(QString login)
     return res;
 }
 
+bool MyDatabase::checkIfBan(int idWhoBan, int idWhoBanned)
+{
+    bool res;
+    QSqlQuery query(myDB);
+    QString selectExists="SELECT COUNT(1) FROM BlackList WHERE IdWhoBanned="+QString::number(idWhoBanned)+" AND IdWhoBan="+QString::number(idWhoBan);
+    query.prepare(selectExists);
+    query.exec();
+    query.next();
+    res=query.value(0).toBool();
+    return res;
+}
+
+bool MyDatabase::checkAccess(QString senderLogin, QString accessToken)
+{
+    bool res;
+    QSqlQuery query(myDB);
+    QString selectExists="select count (1) FROM RoomssUsers WHERE idUser=(SELECT Id FROM Users WHERE login='"+senderLogin+"') And AccessToken='"+accessToken+"'";
+    query.prepare(selectExists);
+    query.exec();
+    query.next();
+    res=query.value(0).toBool();
+    return res;
+}
+
 bool MyDatabase::updateUser(User u)
 {
      if (myDB.isValid()){
          QSqlQuery query(myDB);
-         QString update="UPDATE USERS SET AccessToken='"+u.AccessToken+"' WHERE Login='"+u.Login+"'";
+         QString update="UPDATE USERS SET AccessToken='"+u.accessToken+"' WHERE Login='"+u.login+"'";
          bool res=query.exec(update);
          return res;
       }
 }
 
-QString MyDatabase::selectContact(QString client, int roomId)
+User MyDatabase::selectContact(QString client, int roomId)
 {
     QSqlQuery query(myDB);
-    QString contact;
-    QString select="SELECT us.Login FROM ROOMS r "
+    User user;
+    QString select="SELECT us.Login, us.Id FROM ROOMS r "
             "JOIN RoomssUsers ru ON r.Id=ru.IdRoom "
             "JOIN Users us ON ru.IdUser=us.Id "
             "WHERE r.id="+QString::number(roomId)+" AND ru.IdUser!=(SELECT id FROM Users u WHERE u.Login='"+client+"')";
     query.exec(select);
     QSqlRecord rec =query.record();
     while (query.next()){
-        contact=query.value(rec.indexOf("Login")).toString();
+        user.login=query.value(rec.indexOf("Login")).toString();
+        user.id=query.value(rec.indexOf("Id")).toString();
     }
-    return contact;
+    return user;
 }
 
+
+bool MyDatabase::insertBlackList(int idWhoBan, int idWhoBanned)
+ {
+     QSqlQuery query(myDB);
+     QString insert="INSERT INTO BlackList(idWhoBan, idWhoBanned) VALUES ("+QString::number(idWhoBan)+", "+QString::number(idWhoBanned)+")";
+     bool res=query.exec(insert);
+     return res;
+ }
+
+ bool MyDatabase::deleteBlackList(int idWhoBan, int idWhoBanned)
+ {
+     QSqlQuery query(myDB);
+     QString insert="DELETE FROM BlackLIst WHERE IdWhoBan="+QString::number(idWhoBan)+" AND IdWhoBanned="+QString::number(idWhoBanned);
+     query.exec(insert);
+     bool res=(bool)query.numRowsAffected();
+     return res;
+ }
 
 
 

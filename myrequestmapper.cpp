@@ -3,7 +3,7 @@
 #include <QJsonObject>
 #include <thread>
 
-MyRequestMapper::MyRequestMapper(QObject *parent, MyDatabase* pMDB, QMutex* pm) :
+MyRequestMapper::MyRequestMapper(MyDatabase* pMDB, QMutex* pm, QObject *parent) :
     HttpRequestHandler(parent)
 {
     //pMdb=pMDB;
@@ -20,7 +20,7 @@ void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
     if (path=="/" ) {
         myController.service(request, response);
     }
-    else if(path=="/reg"){
+    else if(path=="/register"){
         regController.service(request, response, pMdb, pM);
     }
     else if(path=="/auth"){
@@ -32,8 +32,8 @@ void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
     else if(path=="/send"){
         sendController.service(request, response, pMdb, pM);
     }
-    else if(path=="/ban"){
-        banController.service(request, response, pMdb, pM);
+    else if(path=="/leave"){
+        leaveController.service(request, response, pMdb, pM);
     }
     else if(path=="/unban"){
         unbanController.service(request, response, pMdb, pM);
@@ -41,8 +41,11 @@ void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
     else if (path=="/create_room"){
         createRoomController.service(request, response, pMdb, pM);
     }
+    else if (path=="/ban"){
+        banController.service(request, response, pMdb, pM);
+    }
     else {
-        response.setStatus(404, "Not found");
+        response.setStatus(404, "Not_found");
     }
 }
 
@@ -61,7 +64,7 @@ QString MyRequestMapper::makeAccessToken(QString login, QList<QJsonObject> rooms
     return authToken;
 }
 
-QMap<int, QString> MyRequestMapper::TokenParse(QString& accessToken, QString &login)
+QMap<int, QString> MyRequestMapper::tokenParse(QString& accessToken, QString &login)
 {
     QStringList pieces=accessToken.split(" ");
     login=pieces[0];

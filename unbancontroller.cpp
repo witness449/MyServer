@@ -13,60 +13,29 @@ void UnbanController::service(HttpRequest &request, HttpResponse &response, MyDa
     QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
     QJsonObject object=doc.object();
 
-    QString creatorLogin=object["creatorLogin"].toString();
-    QString contactLogin=object["contactLogin"].toString();
+    if (request.getMethod()!="POST"){
+           response.setStatus(404, "Not_found");
+           return;
+    }
 
-    int id;
+    response.setHeader("Request-type", "Unban");
 
-    pM->lock();
-    pMdb->selectRoomByLogins(creatorLogin, contactLogin, id);
-    pM->unlock();
-
-    Room r;
-    r.Id=id;
-    r.isActive=1;
+    QString creatorLogin=object["admin_id"].toString();
+    QString contactLogin=object["user_id"].toString();
 
     pM->lock();
-    pMdb->updateRoom(r);
+    User whoBanned;
+    whoBanned=pMdb->selectUser(contactLogin);
+    int idWhoBanned=whoBanned.id.toInt();
+    User whoBan=pMdb->selectUser(creatorLogin);
+    int idWhoBan=whoBan.id.toInt();
+    bool res=pMdb->deleteBlackList(idWhoBan, idWhoBanned);
     pM->unlock();
 
-
-    /*if (res){
-        pMdb->insertRoom(creatorLogin+"AND"+userLogin);
-        pM->lock();
-        //std::string tmp = std::to_string(pMdb->selectRoom());
-        //char const *roomID = tmp.c_str();
-        int roomID=pMdb->selectRoom();
-        pMdb->insertUserRoom(userLogin, roomID, RandomGenerator());
-        pMdb->insertUserRoom(creatorLogin, roomID, RandomGenerator());
-
-        QString str_roomID=QString::number(roomID);
-
-        //pMdb->createMessageTable(str_roomID);
-
-        pM->unlock();
-        QList<QJsonObject> roomsListCreator= pMdb->selectRooms(creatorLogin);
-        QList<QJsonObject> roomsListClient= pMdb->selectRooms(userLogin);
-
-        QString creatorToken=MyRequestMapper::makeAccessToken(creatorLogin, roomsListCreator);
-        QString userToken=MyRequestMapper::makeAccessToken(userLogin, roomsListClient);
-
-        User creator;
-        creator.Login=creatorLogin;
-        creator.AccessToken=creatorToken;
-        User user;
-        user.AccessToken=userToken;
-        user.Login=userLogin;
-
-        pM->lock();
-        pMdb->updateUser(creator);
-        pMdb->updateUser(user);
-        pM->unlock();
-
-
-        response.setStatus(200, "OK");
+    if(res){
+        response.setStatus(200, "Ok");
     }
     else{
-        response.setStatus(403, "Forbidden");
-    }*/
+        response.setStatus(400, "Unknown");
+    }
 }

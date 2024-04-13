@@ -3,62 +3,62 @@
 ClientState::ClientState(QMutex* pm, QString login)
 {
     pM=pm;
-    Login=login;
+    this->login=login;
 }
 
 
-QString ClientState::GetToken()
+QString ClientState::getToken()
 {
-    return AccessToken;
+    return accessToken;
 }
 
-QMap<int, bool> ClientState::GetActiveRooms()
+QMap<int, bool> ClientState::getActiveRooms()
 {
-    return Rooms;
+    return rooms;
 }
-QMap<int, int> ClientState::GetLastEvents()
+QMap<int, int> ClientState::getLastEvents()
 {
-    return Events;
+    return events;
 }
 
 
-void ClientState::SetToken(QString token)
+void ClientState::setToken(QString token)
 {
-    AccessToken=token;
+    accessToken=token;
 }
 
-void ClientState::SetRooms(MyDatabase *pMDB)
+void ClientState::setRooms(MyDatabase *pMDB)
 {
     pM->lock();
-    Rooms=pMDB->selectRoomsForState(Login);
+    rooms=pMDB->selectRoomsForState(login);
     pM->unlock();
 }
 
-void ClientState::SetLastEvents(MyDatabase *pMDB)
+void ClientState::setLastEvents(MyDatabase *pMDB)
 {
     pM->lock();
-    Events=pMDB->selectTopMessages(Login);
+    events=pMDB->selectTopMessages(login);
     pM->unlock();
 }
 
 ClientState& ClientState::operator=(const ClientState& cs)
 {
-    AccessToken=cs.AccessToken;
-    Rooms=cs.Rooms;
-    Events=cs.Events;
+    accessToken=cs.accessToken;
+    rooms=cs.rooms;
+    events=cs.events;
 
     return *this;
 
 }
 
-QJsonObject ClientState::ToJson()
+QJsonObject ClientState::toJson()
 {
     QJsonObject objectRes;
-    objectRes["AccessToken"]=AccessToken;
+    objectRes["AccessToken"]=accessToken;
     QJsonArray arRooms;
     QJsonArray arEvents;
 
-    for (auto i=Rooms.begin(); i!=Rooms.end(); i++)
+    for (auto i=rooms.begin(); i!=rooms.end(); i++)
     {
         QJsonObject object;
         object["Id"]=i.key();
@@ -66,7 +66,7 @@ QJsonObject ClientState::ToJson()
         arRooms.append(object);
     }
 
-    for (auto i=Events.begin(); i!=Events.end(); i++)
+    for (auto i=events.begin(); i!=events.end(); i++)
     {
         QJsonObject object;
         object["IdRoom"]=i.key();
@@ -80,28 +80,28 @@ QJsonObject ClientState::ToJson()
     return objectRes;
 }
 
-void ClientState::SetRoomsFromJson(QJsonArray roomsArr)
+void ClientState::setRoomsFromJson(QJsonArray roomsArr)
 {
     for (auto el:roomsArr)
      {
-        Rooms.insert(el.toObject()["Id"].toInt(), el.toObject()["IsActive"].toBool());
+        rooms.insert(el.toObject()["Id"].toInt(), el.toObject()["IsActive"].toBool());
      }
 }
 
-void ClientState::SetLastEventsFromJson(QJsonArray eventsArr)
+void ClientState::setLastEventsFromJson(QJsonArray eventsArr)
 {
     for (auto el:eventsArr)
      {
-        Events.insert(el.toObject()["IdRoom"].toInt(), el.toObject()["IdEvent"].toInt());
+        events.insert(el.toObject()["IdRoom"].toInt(), el.toObject()["IdEvent"].toInt());
      }
 }
 
 bool ClientState::compareEvents(ClientState& other, int& eventId, int& roomId)
 {
-    for (auto i=Events.begin(); i!=Events.end(); i++)
+    for (auto i=events.begin(); i!=events.end(); i++)
     {
-        auto it=other.Events.find(i.key());
-        if (it==other.Events.end())
+        auto it=other.events.find(i.key());
+        if (it==other.events.end())
         {
             roomId=i.key(); //id пустой комнаты
             return false;
@@ -125,10 +125,10 @@ bool ClientState::compareEvents(ClientState& other, int& eventId, int& roomId)
 
 bool ClientState::compareRooms(ClientState& other, int& roomId, int& roomBanId)
 {
-    for(auto i=Rooms.begin(); i!=Rooms.end(); i++)
+    for(auto i=rooms.begin(); i!=rooms.end(); i++)
     {
-        auto it=other.Rooms.find(i.key());
-        if (it==other.Rooms.end())
+        auto it=other.rooms.find(i.key());
+        if (it==other.rooms.end())
         {
             roomBanId=0;
             roomId=i.key();
@@ -136,10 +136,10 @@ bool ClientState::compareRooms(ClientState& other, int& roomId, int& roomBanId)
         }
     }
 
-    for(auto i=other.Rooms.begin(); i!=other.Rooms.end(); i++)
+    for(auto i=other.rooms.begin(); i!=other.rooms.end(); i++)
     {
-        auto it=Rooms.find(i.key());
-        if (it==Rooms.end())
+        auto it=rooms.find(i.key());
+        if (it==rooms.end())
         {
             roomId=0;
             roomBanId=i.key();

@@ -18,8 +18,8 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
     if (request.getMethod()=="GET")
     {
         response.setHeader("Request-type", "AuthentificationStage1");
-
         response.setStatus(401, "Unauthorized");
+
         QJsonObject jsonObject;
         jsonObject["type"]="m.login.password";
         jsonObject["identifier"]="<login>";
@@ -35,79 +35,56 @@ void AuthController::service(HttpRequest &request, HttpResponse &response, MyDat
         response.write(byte_array, true);
 
     }
-
-
     else if (request.getMethod()=="POST")
     {
-    response.setHeader("Request-type", "AuthentificationStage2");
-    QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
-    QJsonObject object=doc.object();
+        response.setHeader("Request-type", "AuthentificationStage2");
+        QJsonDocument doc=QJsonDocument::fromJson(request.getBody());
+        QJsonObject object=doc.object();
+        QString login=object["identifier"].toString();
+        QString password=object["password"].toString();
+        QString sessId=object["session"].toString();
+        if (object["session"].toString()==sessionId){
+            pM->lock();
+            QString passwordFromDb=pMdb->selectUser(login).password;
+            pM->unlock();
+            if (password==passwordFromDb){
+                pM->lock();
+                QList<QJsonObject> roomsList= pMdb->selectRooms(login);
+                pM->unlock();
+                QJsonObject jsonObject;
+                QJsonArray RoomsArray;
 
-    QString login=object["identifier"].toString();
-    QString password=object["password"].toString();
-    QString sessId=object["session"].toString();
+                for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i){
+                    QJsonObject roomObject;
+                    roomObject["id"]=(*i)["Id"];
+                    roomObject["login"]=(*i)["Login"].toString();
+                    RoomsArray.append(roomObject);
+                }
 
-    if (object["session"].toString()==sessionId)
-    {
-    pM->lock();
-    QString passwordFromDb=pMdb->selectUser(login).Password;
-    pM->unlock();
+                //QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
+                pM->lock();
+                QString authToken=pMdb->selectUser(login).accessToken;
+                pM->unlock();
 
-    if (password==passwordFromDb)
-    {
-        qDebug()<<"authorized";
+                jsonObject["rooms"]=RoomsArray;
+                jsonObject["access_token"]=authToken;
+                response.setStatus(200, "OK");
 
-        pM->lock();
-        QList<QJsonObject> roomsList= pMdb->selectRooms(login);
-        pM->unlock();
-        QJsonObject jsonObject;
-        //jsonObject["Authorization_token"]="pass_from_server";
-        //QString authToken=jsonObject["Authorization_token"].toString();
-        int count=1;
-        QJsonArray RoomsArray;
+                QJsonDocument document=QJsonDocument(jsonObject);
+                QByteArray byte_array = document.toJson();
+                response.setHeader("Content-Type", "application/json");
+                response.write(byte_array, true);
+            }
+            else{
+                response.setStatus(403, "Forbidden");
+            }
 
-        for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i)
-        {
-            QString str_count=QString::number(count);
-            jsonObject[str_count+"Room"]=(*i)["Id"].toString()+" "+(*i)["Login"].toString();
-            //authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
-            QJsonObject roomObject;
-            roomObject["id"]=(*i)["Id"];
-            roomObject["login"]=(*i)["Login"].toString();
-            RoomsArray.append(roomObject);
-            count++;
         }
-
-        /*for(auto& el:roomsList)
-        {
-           QString str_count=QString::number(count);
-           jsonObject[str_count+"Room"]=el;
-           authToken+="_"+el;
-           count++;
-        }*/
-
-        //QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
-
-        pM->lock();
-        QString authToken=pMdb->selectUser(login).AccessToken;
-        pM->unlock();
-
-        jsonObject["Rooms"]=RoomsArray;
-        jsonObject["Authorization_token"]=authToken;
-        response.setStatus(200, "OK");
-        QJsonDocument document=QJsonDocument(jsonObject);
-        QByteArray byte_array = document.toJson();
-        response.setHeader("Content-Type", "application/json");
-        response.write(byte_array, true);
+        else{
+            response.setStatus(403, "Forbidden");
+        }
     }
-    }
-    else
-    {
-        response.setStatus(403, "Forbidden");
-    }
-    }
-    else
-    {
+    else{
         response.setStatus(400, "Unknown");
     }
 }

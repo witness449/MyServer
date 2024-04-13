@@ -5,9 +5,9 @@
 
 struct Room
 {
-    QString Name;
-    int Id;
-    int isActive;
+    QString name;
+    int id;
+    int isActive=0;
 };
 
 #endif // ROOM_H
