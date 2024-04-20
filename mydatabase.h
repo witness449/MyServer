@@ -50,17 +50,17 @@ public:
 
 
     //Получение выборок
-    QList<QJsonObject> selectRooms(QString user); //Получение писка чата по пользователю
-     int selectRoom(); //Возвращает ID последней созданной комнаиты
-    bool findUser(QString userLogin);
-    User selectContact(QString client, int roomId);
-    QMap <int, bool> selectRoomsForState(QString login);
-    QMap<int, int> selectTopMessages(QString login);
+    QList<QJsonObject> const selectRooms(QString user); //Получение писка чата по пользователю
+    int const selectRoom(); //Возвращает ID последней созданной комнаиты
+    bool const findUser(QString userLogin);
+    User const selectContact(QString client, int roomId);
+    QMap <int, bool> const selectRoomsForState(QString login);
+    QMap<int, int> const selectTopMessages(QString login);
     void selectSyncMessage(int idRoom, int lastId, int& thisId, QString& text);
     void selectRoomByLogins(QString login1, QString login2, int&);
-    bool userExists(QString login);
-    bool checkIfBan(int idWhoBan, int idWhoBanned);
-    bool checkAccess(QString senderLogin, QString accessToken);
+    bool const userExists(QString login);
+    bool const checkIfBan(int idWhoBan, int idWhoBanned);
+    bool const checkAccess(QString senderLogin, QString accessToken);
 
 
 

@@ -12,11 +12,11 @@ QString ClientState::getToken()
     return accessToken;
 }
 
-QMap<int, bool> ClientState::getActiveRooms()
+QMap<int, bool> const ClientState::getActiveRooms()
 {
     return rooms;
 }
-QMap<int, int> ClientState::getLastEvents()
+QMap<int, int> const ClientState::getLastEvents()
 {
     return events;
 }
@@ -96,7 +96,7 @@ void ClientState::setLastEventsFromJson(QJsonArray eventsArr)
      }
 }
 
-bool ClientState::compareEvents(ClientState& other, int& eventId, int& roomId)
+bool ClientState::compareEvents(const ClientState& other, int& eventId, int& roomId)
 {
     for (auto i=events.begin(); i!=events.end(); i++)
     {
@@ -123,7 +123,7 @@ bool ClientState::compareEvents(ClientState& other, int& eventId, int& roomId)
     return true;
 }
 
-bool ClientState::compareRooms(ClientState& other, int& roomId, int& roomBanId)
+bool ClientState::compareRooms(const ClientState& other, int& roomId, int& roomBanId)
 {
     for(auto i=rooms.begin(); i!=rooms.end(); i++)
     {

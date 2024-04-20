@@ -15,7 +15,6 @@ public:
     CreateRoomController(QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response, MyDatabase * pMdb, QMutex* pm);
 
-
 signals:
 
 public slots:

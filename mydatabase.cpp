@@ -306,7 +306,7 @@ bool MyDatabase::updateRoom(Room r)
      }
 }
 
-QList<QJsonObject> MyDatabase::selectRooms(QString user)
+QList<QJsonObject> const MyDatabase::selectRooms(QString user)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
@@ -333,7 +333,7 @@ QList<QJsonObject> MyDatabase::selectRooms(QString user)
 }
 
 
-bool MyDatabase:: findUser(QString userLogin)
+bool const MyDatabase:: findUser(QString userLogin)
 {
     QSqlQuery query(myDB);
     QString selectExists="SELECT COUNT(1) FROM Users WHERE Login='"+userLogin+"'";
@@ -344,7 +344,7 @@ bool MyDatabase:: findUser(QString userLogin)
     return res;
 }
 
-int MyDatabase::selectRoom()
+int const MyDatabase::selectRoom()
 {
     QSqlQuery query(myDB);
     QString selectTop="SELECT TOP (1) Id FROM Rooms ORDER BY Id DESC";
@@ -367,7 +367,7 @@ int MyDatabase::selectRoom()
 }*/
 
 
-QMap <int, bool> MyDatabase::selectRoomsForState(QString login)
+QMap <int, bool> const MyDatabase::selectRoomsForState(QString login)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
@@ -389,7 +389,7 @@ QMap <int, bool> MyDatabase::selectRoomsForState(QString login)
     }
 }
 
-QMap<int, int> MyDatabase:: selectTopMessages(QString login)
+QMap<int, int> const MyDatabase:: selectTopMessages(QString login)
 {
     if (myDB.isValid()){
         QSqlQuery query(myDB);
@@ -455,7 +455,7 @@ void MyDatabase::selectRoomByLogins(QString login1, QString login2, int& id)
 
 }
 
-bool MyDatabase::userExists(QString login)
+bool const MyDatabase::userExists(QString login)
 {
     bool res;
     QSqlQuery query(myDB);
@@ -467,7 +467,7 @@ bool MyDatabase::userExists(QString login)
     return res;
 }
 
-bool MyDatabase::checkIfBan(int idWhoBan, int idWhoBanned)
+bool const MyDatabase::checkIfBan(int idWhoBan, int idWhoBanned)
 {
     bool res;
     QSqlQuery query(myDB);
@@ -479,7 +479,7 @@ bool MyDatabase::checkIfBan(int idWhoBan, int idWhoBanned)
     return res;
 }
 
-bool MyDatabase::checkAccess(QString senderLogin, QString accessToken)
+bool const MyDatabase::checkAccess(QString senderLogin, QString accessToken)
 {
     bool res;
     QSqlQuery query(myDB);
@@ -501,7 +501,7 @@ bool MyDatabase::updateUser(User u)
       }
 }
 
-User MyDatabase::selectContact(QString client, int roomId)
+User const MyDatabase::selectContact(QString client, int roomId)
 {
     QSqlQuery query(myDB);
     User user;

@@ -20,8 +20,8 @@ private:
 public:
     ClientState(QMutex*, QString login);
     QString getToken();
-    QMap<int, bool> getActiveRooms();
-    QMap<int, int> getLastEvents();
+    QMap<int, bool> const getActiveRooms();
+    QMap<int, int> const getLastEvents();
 
     void setToken(QString token);
     void setRooms(MyDatabase* pMDB);
@@ -33,8 +33,8 @@ public:
     ClientState& operator=(const ClientState& cs);
     QJsonObject toJson();
 
-    bool compareEvents(ClientState& other, int&, int&);
-    bool compareRooms(ClientState& other, int&, int&);
+    bool compareEvents(const ClientState& other, int&, int&);
+    bool compareRooms(const ClientState& other, int&, int&);
 
 };
 #endif // CLIENTSTATE_H
