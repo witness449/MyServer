@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       -= gui
 QT+=sql
 QT += network
 
@@ -51,11 +51,13 @@ HEADERS  += mainwindow.h \
 
 
 
-FORMS    += mainwindow.ui
+
 
 include(../MyServer/QtWebApp/httpserver/httpserver.pri)
 
 CONFIG +=C++11
+CONFIG   += console
+CONFIG   -= app_bundle
 
 win32:CONFIG(release, debug|release): LIBS +=-LD:/tools/OpenSSL/vc-win32/lib/ -llibcrypto
 

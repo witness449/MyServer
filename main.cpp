@@ -10,12 +10,13 @@
 #include "global.h"
 #include <QTimer>
 #include <QMutex>
+#include <QCoreApplication>
 
 using namespace stefanfrings;
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
     //MainWindow w;
     //w.show();
