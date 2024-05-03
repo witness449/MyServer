@@ -9,9 +9,14 @@
 #include "synccontroller.h"
 #include "sendcontroller.h"
 #include "createroomcontroller.h"
+#include "leavecontroller.h"
+#include "unbancontroller.h"
+#include "bancontroller.h"
 #include "mydatabase.h"
 #include <QMutex>
 #include <QTcpSocket>
+#include <QList>
+#include <QJsonObject>
 
 
 using namespace stefanfrings;
@@ -26,6 +31,9 @@ private:
     SyncController syncController; //Контроллер по конечной точке /sync
     SendController sendController; //Контроллер по конечной точке /send
     CreateRoomController createRoomController; //Контроллер по конечной точке /create_room
+    LeaveController leaveController;
+    UnbanController unbanController;
+    BanController banController;
     MyController myController;
 
     MyDatabase* pMdb;
@@ -33,8 +41,11 @@ private:
 
 
 public:
-    explicit MyRequestMapper(QObject *parent = 0, MyDatabase* pMDB=NULL, QMutex* pm=NULL);
+    explicit MyRequestMapper(MyDatabase* pMDB=NULL, QMutex* pm=NULL, QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response);
+    static QString makeAccessToken(QString login, QList<QJsonObject> roomsList);
+    static QMap<int, QString> tokenParse(QString& accessToken, QString &login);
+
     ~MyRequestMapper();
 
 signals:

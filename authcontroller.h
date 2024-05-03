@@ -3,8 +3,11 @@
 
 #include <QObject>
 #include "httprequesthandler.h"
+#include "httpsession.h"
+#include "httpsessionstore.h"
 #include "mydatabase.h"
 #include <QMutex>
+#include "global.h"
 
 using namespace stefanfrings;
 
@@ -15,6 +18,8 @@ class AuthController: public HttpRequestHandler
 public:
     AuthController(QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response, MyDatabase * pMdb, QMutex* pm);
+private:
+    QString sessionId;
 
 signals:
 

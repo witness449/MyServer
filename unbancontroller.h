@@ -1,5 +1,5 @@
-#ifndef CREATEROOMCONTROLLER_H
-#define CREATEROOMCONTROLLER_H
+#ifndef UNBANCONTROLLER_H
+#define UNBANCONTROLLER_H
 
 #include <QObject>
 #include "httprequesthandler.h"
@@ -8,12 +8,13 @@
 
 using namespace stefanfrings;
 
-class CreateRoomController :  public HttpRequestHandler
+class UnbanController :  public HttpRequestHandler
 {
     Q_OBJECT
 public:
-    CreateRoomController(QObject *parent = 0);
+    UnbanController(QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response, MyDatabase * pMdb, QMutex* pm);
+
 
 signals:
 
@@ -21,4 +22,4 @@ public slots:
 
 };
 
-#endif // CREATEROOMCONTROLLER_H
+#endif // UNBANCONTROLLER_H

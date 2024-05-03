@@ -1,5 +1,5 @@
-#ifndef CREATEROOMCONTROLLER_H
-#define CREATEROOMCONTROLLER_H
+#ifndef LEAVECONTROLLER_H
+#define LEAVECONTROLLER_H
 
 #include <QObject>
 #include "httprequesthandler.h"
@@ -8,12 +8,13 @@
 
 using namespace stefanfrings;
 
-class CreateRoomController :  public HttpRequestHandler
+class LeaveController :  public HttpRequestHandler
 {
     Q_OBJECT
 public:
-    CreateRoomController(QObject *parent = 0);
+    LeaveController(QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response, MyDatabase * pMdb, QMutex* pm);
+
 
 signals:
 
@@ -21,4 +22,4 @@ public slots:
 
 };
 
-#endif // CREATEROOMCONTROLLER_H
+#endif // BANCONTROLLER_H
