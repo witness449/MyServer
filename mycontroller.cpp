@@ -1,5 +1,6 @@
 #include "mycontroller.h"
 
+//Отладочный контроллер
 MyController::MyController(QObject *parent) :
     HttpRequestHandler(parent)
 {

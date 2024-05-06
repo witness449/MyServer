@@ -39,10 +39,10 @@ void MyDatabase::createConnection(){
     qDebug()<<"Database opened: "<<b;
 }
 
-void MyDatabase::closeConnection(){
+/*void MyDatabase::closeConnection(){
     myDB.close();
     qDebug()<<"Database is closed";
-}
+}*/
 
 void MyDatabase::createTable(){
     if(myDB.isValid()){
@@ -344,6 +344,7 @@ bool const MyDatabase:: findUser(QString userLogin)
     return res;
 }
 
+
 int const MyDatabase::selectRoom()
 {
     QSqlQuery query(myDB);
@@ -455,17 +456,7 @@ void MyDatabase::selectRoomByLogins(QString login1, QString login2, int& id)
 
 }
 
-bool const MyDatabase::userExists(QString login)
-{
-    bool res;
-    QSqlQuery query(myDB);
-    QString selectExists="SELECT COUNT(1) FROM USERS WHERE Login='"+login+"'";
-    query.prepare(selectExists);
-    query.exec();
-    query.next();
-    res=query.value(0).toBool();
-    return res;
-}
+
 
 bool const MyDatabase::checkIfBan(int idWhoBan, int idWhoBanned)
 {

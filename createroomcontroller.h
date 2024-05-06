@@ -8,6 +8,7 @@
 
 using namespace stefanfrings;
 
+//Контроллер вызываемый при запросе на создание чата
 class CreateRoomController :  public HttpRequestHandler
 {
     Q_OBJECT

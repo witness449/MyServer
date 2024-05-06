@@ -8,6 +8,7 @@
 
 using namespace stefanfrings;
 
+//Контроллер вызываемый при запросе на удаление из черного списка
 class UnbanController :  public HttpRequestHandler
 {
     Q_OBJECT

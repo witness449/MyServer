@@ -8,6 +8,7 @@
 
 using namespace stefanfrings;
 
+//Контроллер вызываемый при запросе на внесение в черный список
 class BanController :  public HttpRequestHandler
 {
     Q_OBJECT

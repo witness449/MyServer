@@ -3,6 +3,7 @@
 
 #include <QString>
 
+//Структура инкапсулирующая информацию о чате
 struct User
 {
     QString id;

@@ -7,4 +7,6 @@ using namespace stefanfrings;
 
 extern HttpSessionStore* sessionStore;
 
+const QString path="D:/HttpQt/MyServer/MyServer/MyServer/etc/webapp1.ini";
+
 #endif // GLOBAL_H

@@ -8,6 +8,7 @@
 
 using namespace stefanfrings;
 
+//Контроллер вызываемый при запросе на оставление чата
 class LeaveController :  public HttpRequestHandler
 {
     Q_OBJECT
