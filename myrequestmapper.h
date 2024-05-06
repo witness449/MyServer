@@ -31,20 +31,19 @@ private:
     SyncController syncController; //Контроллер по конечной точке /sync
     SendController sendController; //Контроллер по конечной точке /send
     CreateRoomController createRoomController; //Контроллер по конечной точке /create_room
-    LeaveController leaveController;
-    UnbanController unbanController;
-    BanController banController;
-    MyController myController;
+    LeaveController leaveController; //Контроллер по конечной точке /leave
+    UnbanController unbanController; //Контроллер по конечной точке /unban
+    BanController banController; //Контроллер по конечной точке /ban
 
     MyDatabase* pMdb;
     QMutex* pM;
 
-
 public:
     explicit MyRequestMapper(MyDatabase* pMDB=NULL, QMutex* pm=NULL, QObject *parent = 0);
     void service(HttpRequest& request, HttpResponse& response);
-    static QString makeAccessToken(QString login, QList<QJsonObject> roomsList);
-    static QMap<int, QString> tokenParse(QString& accessToken, QString &login);
+
+    static QString makeAccessToken(QString login, QList<QJsonObject> roomsList); //Статический метод сформировать токнен доступа по идентифкатору пользовтаеля и списку его чатов
+    static QMap<int, QString> tokenParse(QString& accessToken, QString &login); //Статический метод парсинга токена доступа
 
     ~MyRequestMapper();
 

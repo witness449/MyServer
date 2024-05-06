@@ -91,8 +91,6 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
             for (auto i = roomsList.cbegin(), end = roomsList.cend(); i != end; ++i)
             {
                 QString str_count=QString::number(count);
-                //jsonObject[str_count+"Room"]=(*i)["Id"].toString()+" "+(*i)["Login"].toString();
-                //authToken+="_"+(*i)["Id"].toString()+" "+(*i)["AccessToken"].toString();
                 QJsonObject roomObject;
                 roomObject["id"]=(*i)["Id"];
                 roomObject["login"]=(*i)["Login"].toString();
@@ -100,8 +98,7 @@ void SyncController::service(HttpRequest &request, HttpResponse &response, MyDat
                 count++;
             }
 
-            //ОБНОВИТЬ ТОКНН ЗАБАННЕННОГО!!!
-
+            //Проверить изменение токена для забанненного
             QString authToken=MyRequestMapper::makeAccessToken(login, roomsList);
             QString roomName;
 

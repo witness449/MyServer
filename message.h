@@ -3,6 +3,7 @@
 
 #include <QString>
 
+//Структура с информацией о сообщении
 struct Message
 {
     QString senderLogin;

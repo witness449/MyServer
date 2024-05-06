@@ -35,7 +35,7 @@ void RegController::service(HttpRequest &request, HttpResponse &response, MyData
     u.password=password;
 
     pM->lock();
-    bool exists=pMdb->userExists(login);
+    bool exists=pMdb->findUser(login);
     pM->unlock();
 
     if (!exists){

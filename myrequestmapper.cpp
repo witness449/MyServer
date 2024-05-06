@@ -5,22 +5,14 @@
 
 MyRequestMapper::MyRequestMapper(MyDatabase* pMDB, QMutex* pm, QObject *parent) :
     HttpRequestHandler(parent)
-{
-    //pMdb=pMDB;
+{    
     pMdb=new MyDatabase();
-    //pMdb->createConnection();
-    //pMdb->dropTable();
-    //pMdb->createTable();
     pM=new QMutex;
-
 }
 
 void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
     QByteArray path=request.getPath();
-    if (path=="/" ) {
-        myController.service(request, response);
-    }
-    else if(path=="/register"){
+    if(path=="/register"){
         regController.service(request, response, pMdb, pM);
     }
     else if(path=="/auth"){
@@ -51,7 +43,7 @@ void MyRequestMapper::service(HttpRequest &request, HttpResponse &response){
 
 MyRequestMapper::~MyRequestMapper()
 {
-    pMdb->closeConnection();
+    //pMdb->closeConnection();
 }
 
 QString MyRequestMapper::makeAccessToken(QString login, QList<QJsonObject> roomsList)

@@ -26,10 +26,12 @@ int main(int argc, char *argv[])
     //Обеспечение синхронизации
     QMutex m;
 
-    QSettings* sessionSettings=new QSettings("D:/HttpQt/MyServer/MyServer/MyServer/etc/webapp1.ini", QSettings::IniFormat);
+
+
+    QSettings* sessionSettings=new QSettings(path, QSettings::IniFormat);
     sessionSettings->beginGroup("sessions");
     sessionStore=new stefanfrings::HttpSessionStore(sessionSettings);
-    QSettings* listenerSettings=new QSettings("D:/HttpQt/MyServer/MyServer/MyServer/etc/webapp1.ini",QSettings::IniFormat);
+    QSettings* listenerSettings=new QSettings(path,QSettings::IniFormat);
     listenerSettings->beginGroup("listener");
     new HttpListener(listenerSettings,new MyRequestMapper(pMyDB, &m));
 
